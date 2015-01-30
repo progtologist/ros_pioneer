@@ -36,45 +36,105 @@
 * Authors: Aris Synodinos
 *********************************************************************/
 
-#include <ros_arcos/packet.h>
+#include <ros_arcos/arcos_packet.h>
 
 namespace ros_arcos{
 
 /** FRIEND FUNCTIONS **/
 std::ostream& operator<<(std::ostream &out, const ArcosPacket &packet)
 {
-  std::string temp_string(packet.packet_);
-  out << temp_string;
+  out << packet.packet_;
   return out;
 }
 
 std::istream& operator>>(std::istream &in, ArcosPacket &packet)
 {
-  std::string temp_string;
-  in >> temp_string;
-  std::sprintf(packet.packet_, "%s", temp_string.c_str());
-  return in;
+  in >> packet.packet_;
+  return (in);
 }
 
 /** CLASS FUNCTIONS **/
 ArcosPacket::ArcosPacket(const char *s)
 {
-  std::strncpy(packet_, s, sizeof(packet_));
+  packet_.assign(s);
 }
 
 ArcosPacket& ArcosPacket::operator<<(const char *s)
 {
-  std::string temp_string(this->getPacket());
-  temp_string.append(s);
-  std::strncpy(this->packet_, temp_string.c_str(), sizeof(this->packet_));
+  this->packet_.append(s);
   return (*this);
+}
+
+void ArcosPacket::packet(const std::string &packet)
+{
+  packet_ = packet;
 }
 
 std::string ArcosPacket::getPacket()
 {
-  std::string temp_string(packet_);
-  return (temp_string);
+  return (packet_);
 }
 
+bool ArcosPacket::check(unsigned char* packet)
+{
+  int checksum = this->calculateChecksum(packet);
+  size_t packet_size = packet[2] - 2;
+  if ( (checksum == packet[packet_size-2] << 8) | packet[packet_size-1])
+    return true;
+  return false;
+}
+
+unsigned char* ArcosPacket::build()
+{
+  unsigned char* char_packet = new unsigned char[packet_.size()+5];
+  char_packet[0]=0xFA;
+  char_packet[1]=0xFB;
+  char_packet[2]=packet_.size() + 2;
+  std::strncpy(reinterpret_cast<char*>(&char_packet[3]),
+      packet_.c_str(),
+      packet_.size());
+  int checksum = this->calculateChecksum(char_packet);
+  char_packet[packet_.size()+3] = checksum >> 8;
+  char_packet[packet_.size()+4] = checksum & 0xFF;
+  return (char_packet);
+}
+
+void ArcosPacket::send()
+{
+  unsigned char* packet = this->build();
+  ROS_INFO("HEXADECIMAL");
+  for (size_t i = 0; i < (packet_.size()+5); ++i)
+  {
+    ROS_INFO("0x%.2x ", packet[i]);
+  }
+  ROS_INFO("DECIMAL");
+  for (size_t i = 0; i < (packet_.size()+5); ++i)
+  {
+    ROS_INFO("%u ", packet[i]);
+  }
+
+  ROS_INFO("%s", this->check(packet) ? "True" : "False");
+
+  delete[] packet;
+}
+
+int ArcosPacket::calculateChecksum(unsigned char* packet)
+{
+  int checksum = 0;
+  size_t bytes_left = packet[2] - 2;
+  size_t current_byte = 3;
+  while (bytes_left > 1)
+  {
+    checksum += ((unsigned char)packet[current_byte]<<8) | (unsigned char)packet[current_byte+1];
+    checksum = checksum & 0xFFFF;
+    bytes_left -= 2;
+    current_byte += 2;
+  }
+  if (current_byte > 0)
+    checksum = checksum ^ (int)((unsigned char)packet[current_byte]);
+
+  ROS_INFO("Checksum is %i", checksum);
+  return (checksum);
+}
 
 }

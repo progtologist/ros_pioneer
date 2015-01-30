@@ -37,8 +37,8 @@
 *********************************************************************/
 
 
-#ifndef PACKET_H
-#define PACKET_H
+#ifndef ARCOS_PACKET_H
+#define ARCOS_PACKET_H
 
 #include <ros/ros.h>
 #include <iostream>
@@ -55,16 +55,16 @@ public:
 
   ArcosPacket(const char *s = "");
   ArcosPacket& operator<<(const char *s);
+  void packet(const std::string &packet);
   std::string getPacket();
-  int send();
-  int receive();
-  bool check();
+  void send();
+  void receive();
   bool operator!=(ArcosPacket other);
 protected:
-  int build();
-  int calcChecksum();
-  char packet_[200];
-  int size_;
+  unsigned char* build();
+  int calculateChecksum(unsigned char* packet);
+  bool check(unsigned char* packet);
+  std::string packet_;
   ros::Time timestamp_;
 };
 

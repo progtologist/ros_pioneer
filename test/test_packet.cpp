@@ -37,7 +37,7 @@
 *********************************************************************/
 
 #include <gtest/gtest.h>
-#include <ros_arcos/packet.h>
+#include <ros_arcos/arcos_packet.h>
 
 using namespace ros_arcos;
 using namespace std;
@@ -49,6 +49,7 @@ TEST(ArcosPacket, Shift_Assignment_Operators)
   ASSERT_STREQ("test", pac.getPacket().c_str());
   pac << "newTest";
   ASSERT_STREQ("testnewTest", pac.getPacket().c_str());
+  pac.send();
 }
 
 int main(int argc, char **argv) {
