@@ -84,12 +84,12 @@ bool ArcosPacket::check(unsigned char* packet)
   return false;
 }
 
-unsigned char* ArcosPacket::build()
+unsigned char* ArcosPacket::encode()
 {
   unsigned char* char_packet = new unsigned char[packet_.size()+5];
-  char_packet[0]=0xFA;
-  char_packet[1]=0xFB;
-  char_packet[2]=packet_.size() + 2;
+  char_packet[0] = 0xFA;
+  char_packet[1] = 0xFB;
+  char_packet[2] = packet_.size() + 2;
   std::strncpy(reinterpret_cast<char*>(&char_packet[3]),
       packet_.c_str(),
       packet_.size());
@@ -99,9 +99,19 @@ unsigned char* ArcosPacket::build()
   return (char_packet);
 }
 
+void ArcosPacket::decode(unsigned char *packet)
+{
+  size_t packet_size = packet[2] - 2;
+  unsigned char* null_terminated_packet = new unsigned char[packet_size+1];
+  std::strncpy(reinterpret_cast<char*>(null_terminated_packet),
+               reinterpret_cast<char*>(&packet[3]), packet_size);
+  null_terminated_packet[packet_size] = '\0';
+  packet_.assign(reinterpret_cast<char*>(null_terminated_packet));
+}
+
 void ArcosPacket::send()
 {
-  unsigned char* packet = this->build();
+  unsigned char* packet = this->encode();
   ROS_INFO("HEXADECIMAL");
   for (size_t i = 0; i < (packet_.size()+5); ++i)
   {

@@ -61,7 +61,8 @@ public:
   void receive();
   bool operator!=(ArcosPacket other);
 protected:
-  unsigned char* build();
+  unsigned char* encode();
+  void decode(unsigned char* packet);
   int calculateChecksum(unsigned char* packet);
   bool check(unsigned char* packet);
   std::string packet_;
