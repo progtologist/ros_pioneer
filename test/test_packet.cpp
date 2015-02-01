@@ -42,14 +42,44 @@
 using namespace ros_arcos;
 using namespace std;
 
-TEST(ArcosPacket, Shift_Assignment_Operators)
+TEST(ArcosPacket, Void_Commands)
 {
   ArcosPacket pac;
-  pac << "test";
-  ASSERT_STREQ("test", pac.getPacket().c_str());
-  pac << "newTest";
-  ASSERT_STREQ("testnewTest", pac.getPacket().c_str());
-  pac.send();
+  pac.command(cmd::PULSE);
+
+  pac.printHex();
+
+  pac.printDec();
+}
+
+TEST(ArcosPacket, Int_Commands)
+{
+  ArcosPacket pac;
+  pac.command(cmd::HOSTBAUD, 3);
+
+  pac.printHex();
+
+  pac.printDec();
+}
+
+TEST(ArcosPacket, TwoBytes_Commands)
+{
+  ArcosPacket pac;
+  pac.command(cmd::ARM_POS, 25, 3);
+
+  pac.printHex();
+
+  pac.printDec();
+}
+
+TEST(ArcosPacket, String_Commands)
+{
+  ArcosPacket pac;
+  pac.command(cmd::TTY2, "TEST");
+
+  pac.printHex();
+
+  pac.printDec();
 }
 
 int main(int argc, char **argv) {

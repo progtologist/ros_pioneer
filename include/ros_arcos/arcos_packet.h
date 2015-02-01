@@ -1,5 +1,5 @@
 /*********************************************************************
-* packet.h
+* arcos_packet.h
 *
 * Software License Agreement (BSD License)
 *
@@ -41,34 +41,44 @@
 #define ARCOS_PACKET_H
 
 #include <ros/ros.h>
-#include <iostream>
 #include <string>
-#include <cstdio>
+#include <ros_arcos/arcos_commands.h>
 
 namespace ros_arcos{
 
 class ArcosPacket
 {
 public:
-  friend std::ostream& operator<<(std::ostream &out, const ArcosPacket &packet);
-  friend std::istream& operator>>(std::istream &in, ArcosPacket &packet);
-
-  ArcosPacket(const char *s = "");
-  ArcosPacket& operator<<(const char *s);
-  void packet(const std::string &packet);
-  std::string getPacket();
-  void send();
-  void receive();
-  bool operator!=(ArcosPacket other);
+  void command(const cmd::Void_t &command);
+  void command(const cmd::Int_t &command, int value);
+  void command(const cmd::TwoBytes_t &command,
+               unsigned char first_byte,
+               unsigned char second_byte);
+  void command(const cmd::Str_t &command,
+               const std::string &msg);
+  void send(int file_descriptor);
+  void receive(int file_descriptor);
+  unsigned char& operator [](int i);
+  unsigned char operator [](int i) const;
+  void printHex();
+  void printDec();
 protected:
-  unsigned char* encode();
-  void decode(unsigned char* packet);
-  int calculateChecksum(unsigned char* packet);
-  bool check(unsigned char* packet);
-  std::string packet_;
-  ros::Time timestamp_;
+  int calculateChecksum();
+  bool check();
+  void setHeader();
+  void setSize(unsigned char size);
+  void setCommand(unsigned char command);
+  void setType(const cmd::Types_t &type);
+  void setArgument(int value);
+  void setArgument(unsigned char first_byte,
+                   unsigned char second_byte);
+  void setArgument(const std::string &argument);
+  void setChecksum();
+
+  // Variables
+  unsigned char buffer_[207];
 };
 
 }
 
-#endif
+#endif // ARCOS_PACKET_H
