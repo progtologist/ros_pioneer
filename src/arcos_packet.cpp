@@ -42,95 +42,172 @@
 
 namespace ros_arcos{
 
-void ArcosPacket::command(const cmd::Void_t &command)
+void ArcosPacket::command(const Init_t &command)
 {
+  this->clear();
   this->setHeader();
   this->setSize(3);
   this->setCommand(static_cast<unsigned char>(command));
   this->setChecksum();
 }
 
-void ArcosPacket::command(const cmd::Int_t &command, int value)
+void ArcosPacket::command(const Void_t &command)
 {
+  this->clear();
+  this->setHeader();
+  this->setSize(3);
+  this->setCommand(static_cast<unsigned char>(command));
+  this->setChecksum();
+}
+
+void ArcosPacket::command(const Int_t &command, int value)
+{
+  this->clear();
   this->setHeader();
   this->setSize(6);
   this->setCommand(static_cast<unsigned char>(command));
-  cmd::Types_t type = (value >= 0) ? cmd::ARGINT : cmd::ARGNINT;
+  Types_t type = (value >= 0) ? ARGINT : ARGNINT;
   this->setType(type);
   this->setArgument(value);
   this->setChecksum();
 }
 
-void ArcosPacket::command(const cmd::TwoBytes_t &command,
+void ArcosPacket::command(const TwoBytes_t &command,
                           unsigned char first_byte,
                           unsigned char second_byte)
 {
+  this->clear();
   this->setHeader();
   this->setSize(6);
   this->setCommand(static_cast<unsigned char>(command));
-  this->setType(cmd::ARGINT);
+  this->setType(ARGINT);
   this->setArgument(first_byte,second_byte);
   this->setChecksum();
 }
 
-void ArcosPacket::command(const cmd::Str_t &command,
+void ArcosPacket::command(const Str_t &command,
                           const std::string &msg)
 {
   assert(msg.size() < 200);
+  this->clear();
   this->setHeader();
   this->setSize(msg.size()+5);
   this->setCommand(static_cast<unsigned char>(command));
-  this->setType(cmd::ARGSTR);
+  this->setType(ARGSTR);
   this->setArgument(msg);
   this->setChecksum();
 }
 
-void ArcosPacket::send(int file_descriptor)
+void ArcosPacket::clear()
+{
+  memset(buffer_, 0, sizeof(buffer_));
+}
+
+bool ArcosPacket::send(int file_descriptor)
 {
   size_t buffer_size = buffer_[2] + 3;  // Send the entire buffer,
                                         // Including the header
   size_t written_bytes = write(file_descriptor, buffer_, buffer_size);
   if (written_bytes != buffer_size)
+  {
     ROS_ERROR("Could not send the entire buffer");
+    return false;
+  }
+  return true;
 }
 
-void ArcosPacket::receive(int file_descriptor)
+bool ArcosPacket::receive(int file_descriptor)
 {
   unsigned char current_char = 0, previous_char = 0;
   bool header_flag = false;
 
-  memset(buffer_, 0, sizeof(buffer_));
+  this->clear();
 
-  while (!header_flag)
+  while (!header_flag && ros::ok())
   {
     if ( (read(file_descriptor, &current_char, 1) < 0) )
+    {
       ROS_ERROR("Error while trying to read serial port");
+      return false;
+    }
     if (previous_char == 0xFA && current_char == 0xFB)
+    {
       header_flag = true;
+    }
+    previous_char = current_char;
   }
   this->setHeader();
   read(file_descriptor, &current_char, 1);
   this->setSize(current_char);
   if ( (read(file_descriptor, &buffer_[3], buffer_[2]) < buffer_[2]) )
+  {
     ROS_ERROR("Error while trying to read the packet body");
+    return false;
+  }
   if (!this->check())
+  {
     ROS_ERROR("Packet failed to pass checksum");
-}
-
-unsigned char& ArcosPacket::operator [](int i)
-{
-  if (i <0 || i > 206)
-    ROS_ERROR("Packet out of bounds");
-  else
-    return buffer_[i];
+    return false;
+  }
+  return true;
 }
 
 unsigned char ArcosPacket::operator [](int i) const
 {
-  if (i <0 || i > 206)
-    ROS_ERROR("Packet out of bounds");
+  if (i < 0 || i > 206)
+    ROS_ERROR("Packet out of bounds, requested %i", i);
   else
     return buffer_[i];
+}
+
+unsigned char ArcosPacket::at(int i) const
+{
+  if (i < 0 || i > buffer_[2] - 2)
+    ROS_ERROR("Packet out of bounds, requested %i and size was %i", i, buffer_[2]-2);
+  else
+    return buffer_[i+2];
+}
+
+int ArcosPacket::getIntegerAt(int i) const
+{
+  /* 15 ls-bits */
+  if (i < 0 || i > buffer_[2] - 2)
+    ROS_ERROR("Packet out of bounds, requested %i and size was %i", i, buffer_[2]-2);
+  else
+  {
+    int value = buffer_[i+2] | buffer_[i+3] << 8;
+    return (value);
+  }
+}
+
+std::string ArcosPacket::getStringAt(int i) const
+{
+  if (i < 0 || i > buffer_[2] - 2)
+    ROS_ERROR("Packet out of bounds, requested %i and size was %i", i, buffer_[2]-2);
+  else
+  {
+    std::string msg;
+    while (buffer_[i+2] != '\0' && i < buffer_[2] - 1)
+    {
+      msg.append(reinterpret_cast<const char*>(&buffer_[i+2]),
+          reinterpret_cast<const char*>(&buffer_[i+3]));
+      i++;
+    }
+    return msg;
+  }
+}
+
+std::string ArcosPacket::getStringAt(int i, size_t length) const
+{
+  if (i < 0 || i > buffer_[2] - 2 || length > buffer_[2] - 2)
+    ROS_ERROR("Packet out of bounds, requested %i, length was %i, size was %i,", i, length, buffer_[2]-2);
+  else
+  {
+    std::string msg;
+    msg.append(reinterpret_cast<const char*>(&buffer_[i+2]),
+        reinterpret_cast<const char*>(&buffer_[i+length+2]));
+    return msg;
+  }
 }
 
 bool ArcosPacket::check()
@@ -157,7 +234,7 @@ int ArcosPacket::calculateChecksum()
   if (current_byte > 0)
     checksum = checksum ^ buffer_[current_byte];
 
-  ROS_INFO("Checksum is %i", checksum);
+  ROS_DEBUG("Checksum is %i", checksum);
   return (checksum);
 }
 
@@ -183,6 +260,17 @@ void ArcosPacket::printDec()
   }
 }
 
+void ArcosPacket::printASCII()
+{
+  size_t buffer_size = buffer_[2] + 3;  // Print the entire buffer,
+                                        // Including the header
+  ROS_INFO("ASCII");
+  for (size_t i = 0; i < buffer_size; ++i)
+  {
+    ROS_INFO("%c ", static_cast<unsigned char>(buffer_[i]));
+  }
+}
+
 void ArcosPacket::setHeader()
 {
   buffer_[0] = 0xFA;
@@ -199,7 +287,7 @@ void ArcosPacket::setCommand(unsigned char command)
   buffer_[3] = command;
 }
 
-void ArcosPacket::setType(const cmd::Types_t &type)
+void ArcosPacket::setType(const Types_t &type)
 {
   buffer_[4] = static_cast<unsigned char>(type);
 }
@@ -207,8 +295,8 @@ void ArcosPacket::setType(const cmd::Types_t &type)
 void ArcosPacket::setArgument(int value)
 {
   unsigned short argument = static_cast<unsigned short>(std::abs(value));
-  buffer_[5] = argument & 0x00FF;
-  buffer_[6] = argument & 0xFF00 >> 8;
+  buffer_[5] = argument & 0xFF;
+  buffer_[6] = (argument >> 8) & 0xFF;
 }
 
 void ArcosPacket::setArgument(unsigned char first_byte,

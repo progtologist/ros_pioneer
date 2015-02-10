@@ -11,14 +11,15 @@ catkin_package(
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 file(GLOB_RECURSE HEADERS include/${PROJECT_NAME}/*.h)
+file(GLOB_RECURSE SOURCES src/*.cpp)
 
-add_library(arcos_packet src/arcos_packet.cpp ${HEADERS})
-target_link_libraries(arcos_packet ${catkin_LIBRARIES})
+add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
 file(GLOB_RECURSE TESTS ${PROJECT_SOURCE_DIR}/test/*.cpp)
 
 foreach(ITEM ${TESTS})
     get_filename_component(filename ${ITEM} NAME_WE)
     catkin_add_gtest(${filename} ${ITEM})
-    target_link_libraries(${filename} arcos_packet)
+    target_link_libraries(${filename} ${PROJECT_NAME})
 endforeach()

@@ -45,30 +45,113 @@
 #include <ros_arcos/arcos_commands.h>
 
 namespace ros_arcos{
-
+/**
+ * @brief The ArcosPacket class
+ */
 class ArcosPacket
 {
 public:
-  void command(const cmd::Void_t &command);
-  void command(const cmd::Int_t &command, int value);
-  void command(const cmd::TwoBytes_t &command,
+  /**
+   * @brief command Create a packet with an initialization command
+   * @param command The initialization that the packet contains.
+   */
+  void command(const Init_t &command);
+  /**
+   * @brief command Create a packet with a command that takes no arguments
+   * @param command The command that the packet contains.
+   */
+  void command(const Void_t &command);
+  /**
+   * @brief command Create a packet with a command that takes an integer argument
+   * @param command The command that the packet contains.
+   * @param value The argument of the command.
+   */
+  void command(const Int_t &command, int value);
+  /**
+   * @brief command Create a packet with a command that takes a two byte argument
+   * @param command The command that the packet contains.
+   * @param first_byte The first byte of the argument.
+   * @param second_byte The second byte of the argument.
+   */
+  void command(const TwoBytes_t &command,
                unsigned char first_byte,
                unsigned char second_byte);
-  void command(const cmd::Str_t &command,
+  /**
+   * @brief command Create a packet with a command that takes a string argument
+   * @param command The command that the packet contains.
+   * @param msg The string argument of the command.
+   */
+  void command(const Str_t &command,
                const std::string &msg);
-  void send(int file_descriptor);
-  void receive(int file_descriptor);
-  unsigned char& operator [](int i);
+  /**
+   * @brief clear Empties the packet contents
+   */
+  void clear();
+  /**
+   * @brief send Writes the packet to the given file descriptor
+   * @param file_descriptor The file descriptor to write to.
+   * @return True if successfull, false otherwise.
+   */
+  bool send(int file_descriptor);
+  /**
+   * @brief receive Reads the packet from the given file descriptor
+   * @param file_descriptor The file descriptor to read from.
+   * @return True if successfull, false otherwise.
+   */
+  bool receive(int file_descriptor);
+  /**
+   * @brief operator [] The accessor to the packet data. All the data are accessible
+   * @param i The byte to be read.
+   * @return The unsigned character of the requested byte.
+   */
   unsigned char operator [](int i) const;
+  /**
+   * @brief at The accessor to the packet data. The header and checksum data are
+   * skipped from this interface.
+   * @param i The byte to be read.
+   * @return The unsigned character of the requested byte.
+   */
+  unsigned char at(int i) const;
+  /**
+   * @brief getIntegerAt Returns the integer stored at the current and next byte.
+   * @param i The first byte of the integer.
+   * @return The integer stored.
+   */
+  int getIntegerAt(int i) const;
+  /**
+   * @brief getStringAt Returns the string stored starting at the current byte
+   * ending with a null character.
+   * @param i The first byte of the string.
+   * @return The string stored.
+   */
+  std::string getStringAt(int i) const;
+  /**
+   * @brief getStringAt Returns the string stored starting at the current byte
+   * with a fixed length.
+   * @param i The first byte of the string.
+   * @param length The length of the string.
+   * @return The string stored.
+   */
+  std::string getStringAt(int i, size_t length) const;
+  /**
+   * @brief printHex Print to the ros console the Hexadecimal bytes of the package.
+   */
   void printHex();
+  /**
+   * @brief printDec Print to the ros console the Decimal bytes of the package.
+   */
   void printDec();
+  /**
+   * @brief printASCII Print to the ros console the ASCII characters of the package.
+   */
+  void printASCII();
 protected:
   int calculateChecksum();
   bool check();
   void setHeader();
   void setSize(unsigned char size);
   void setCommand(unsigned char command);
-  void setType(const cmd::Types_t &type);
+  void setType(const Types_t &type);
   void setArgument(int value);
   void setArgument(unsigned char first_byte,
                    unsigned char second_byte);

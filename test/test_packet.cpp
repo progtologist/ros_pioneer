@@ -42,48 +42,147 @@
 using namespace ros_arcos;
 using namespace std;
 
+TEST(ArcosPacket, Init_Commands)
+{
+  {
+    ArcosPacket pac;
+    pac.command(SYNC0);
+    EXPECT_EQ(pac[0],250);
+    EXPECT_EQ(pac[1],251);
+    EXPECT_EQ(pac[2],3);
+    EXPECT_EQ(pac[3],0);
+    EXPECT_EQ(pac[4],0);
+    EXPECT_EQ(pac[5],0);
+  }
+
+  {
+    ArcosPacket pac;
+    pac.command(SYNC1);
+    EXPECT_EQ(pac[0],250);
+    EXPECT_EQ(pac[1],251);
+    EXPECT_EQ(pac[2],3);
+    EXPECT_EQ(pac[3],1);
+    EXPECT_EQ(pac[4],0);
+    EXPECT_EQ(pac[5],1);
+  }
+
+  {
+    ArcosPacket pac;
+    pac.command(SYNC2);
+    EXPECT_EQ(pac[0],250);
+    EXPECT_EQ(pac[1],251);
+    EXPECT_EQ(pac[2],3);
+    EXPECT_EQ(pac[3],2);
+    EXPECT_EQ(pac[4],0);
+    EXPECT_EQ(pac[5],2);
+  }
+}
+
 TEST(ArcosPacket, Void_Commands)
 {
   ArcosPacket pac;
-  pac.command(cmd::PULSE);
+  pac.command(PULSE);
 
-  pac.printHex();
-
-  pac.printDec();
+  EXPECT_EQ(pac[0],0xFA);
+  EXPECT_EQ(pac[1],0xFB);
+  EXPECT_EQ(pac[2],0x03);
+  EXPECT_EQ(pac[3],0x00);
+  EXPECT_EQ(pac[4],0x00);
+  EXPECT_EQ(pac[5],0x00);
 }
 
 TEST(ArcosPacket, Int_Commands)
 {
   ArcosPacket pac;
-  pac.command(cmd::HOSTBAUD, 3);
-
-  pac.printHex();
-
-  pac.printDec();
+  pac.command(HOSTBAUD, 3);
+  EXPECT_EQ(pac[0],0xFA);
+  EXPECT_EQ(pac[1],0xFB);
+  EXPECT_EQ(pac[2],0x06);
+  EXPECT_EQ(pac[3],0x32);
+  EXPECT_EQ(pac[4],0x3B);
+  EXPECT_EQ(pac[5],0x03);
+  EXPECT_EQ(pac[6],0x00);
+  EXPECT_EQ(pac[7],0x35);
+  EXPECT_EQ(pac[8],0x3B);
 }
 
 TEST(ArcosPacket, TwoBytes_Commands)
 {
   ArcosPacket pac;
-  pac.command(cmd::ARM_POS, 25, 3);
-
-  pac.printHex();
-
-  pac.printDec();
+  pac.command(ARM_POS, 25, 3);
+  EXPECT_EQ(pac[0],0xFA);
+  EXPECT_EQ(pac[1],0xFB);
+  EXPECT_EQ(pac[2],0x06);
+  EXPECT_EQ(pac[3],0x4D);
+  EXPECT_EQ(pac[4],0x3B);
+  EXPECT_EQ(pac[5],0x19);
+  EXPECT_EQ(pac[6],0x03);
+  EXPECT_EQ(pac[7],0x66);
+  EXPECT_EQ(pac[8],0x3E);
 }
 
 TEST(ArcosPacket, String_Commands)
 {
   ArcosPacket pac;
-  pac.command(cmd::TTY2, "TEST");
-
-  pac.printHex();
-
-  pac.printDec();
+  pac.command(TTY2, "TEST");
+  EXPECT_EQ(pac[0],0xFA);
+  EXPECT_EQ(pac[1],0xFB);
+  EXPECT_EQ(pac[2],0x09);
+  EXPECT_EQ(pac[3],0x2A);
+  EXPECT_EQ(pac[4],0x2B);
+  EXPECT_EQ(pac[5],0x04);
+  EXPECT_EQ(pac[6],0x54);
+  EXPECT_EQ(pac[7],0x45);
+  EXPECT_EQ(pac[8],0x53);
+  EXPECT_EQ(pac[9],0x54);
+  EXPECT_EQ(pac[10],0x73);
+  EXPECT_EQ(pac[11],0x86);
 }
 
-int main(int argc, char **argv) {
+TEST(ArcosPacket, At_Accessor)
+{
+  ArcosPacket pac;
+  pac.command(PULSE);
+  EXPECT_EQ(pac.at(0),0x03);
+  EXPECT_EQ(pac.at(1),0x00);
+}
+
+TEST(ArcosPacket, Get_Integer_At_Accessor)
+{
+  ArcosPacket pac;
+  pac.command(HOSTBAUD, 22);
+  EXPECT_EQ(pac.at(0), 6);                            // Size of packet
+  EXPECT_EQ(pac.at(1), HOSTBAUD);                // The command
+  EXPECT_EQ(pac.at(2), ARGINT);                  // The data type
+  EXPECT_EQ(pac.getIntegerAt(3), 22);                 // The Integer
+}
+
+TEST(ArcosPacket, Get_String_At_Length_Accessor)
+{
+  ArcosPacket pac;
+  pac.command(TTY2, "TEST");
+  EXPECT_EQ(pac.at(0), 9);                            // Size of packet
+  EXPECT_EQ(pac.at(1), TTY2);                    // The command
+  EXPECT_EQ(pac.at(2), ARGSTR);                  // The data type
+  EXPECT_EQ(pac.at(3), 4);                            // The size of the string
+  EXPECT_STREQ(pac.getStringAt(4,4).c_str(),"TEST");  // The String
+}
+
+TEST(ArcosPacket, Get_String_At_Accessor)
+{
+  ArcosPacket pac;
+  std::string test_str("NULL TERMINATED");
+  pac.command(TTY2, test_str.c_str());
+  EXPECT_EQ(pac.at(0), 20);
+  EXPECT_EQ(pac.at(1), TTY2);
+  EXPECT_EQ(pac.at(2), ARGSTR);
+  EXPECT_EQ(pac.at(3), 15);
+  EXPECT_STREQ(pac.getStringAt(4).c_str(),test_str.c_str());
+}
+
+int main(int argc, char **argv)
+{
   testing::InitGoogleTest(&argc, argv);
-  ros::init(argc, argv, "google_test");
+  ros::init(argc, argv, "google_test_packet");
   return RUN_ALL_TESTS();
 }

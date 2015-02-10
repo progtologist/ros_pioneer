@@ -41,7 +41,12 @@
 
 namespace ros_arcos{
 
-namespace cmd{
+typedef enum
+{
+  SYNC0     = 0,        // First syncronization packet
+  SYNC1     = 1,        // Second syncronization packet
+  SYNC2     = 2,        // Third syncronization packet
+}Init_t;
 
 typedef enum
 {
@@ -238,31 +243,25 @@ typedef enum{
   ARGINT      = 59,     // Positive Integer
   ARGNINT     = 27,     // Negative or Unsigned Integer
   ARGSTR      = 43,     // String Argument
-} Types_t;
+}Types_t;
 
-} // cmd
-
-namespace sip{
-
-const unsigned char STANDARDMINpac  = 0x30;
-const unsigned char STANDARDSTOP    = 0x32;
-const unsigned char STANDARDMOVE    = 0x33;
-const unsigned char STANDARDMAXpac  = 0x3F;
-const unsigned char CONFIGpac       = 0x20;
-const unsigned char SERAUXpac       = 0xB0;
-const unsigned char SERAUX2pac      = 0xB8;
-const unsigned char SERAUX3pac      = 0xC8;
-const unsigned char ENCODERpac      = 0x90;
-const unsigned char TCM2pac         = 0xC0;
-const unsigned char IOpac           = 0xF0;
-const unsigned char IMUpac          = 0x9A;
-const unsigned char JOYSTICKpac     = 0xF8;
-const unsigned char GRIPPERpac      = 0xE0;
-const unsigned char GYROpac         = 0x98;
-const unsigned char ARMINFOpac      = 0xA1;
-const unsigned char ARMpac          = 0xA0;
-
-} // sip
+typedef enum{
+  STANDARDmpac= 48,
+  STANDARDMpac= 63,
+  CONFIGpac   = 32,
+  SERAUXpac   = 176,
+  SERAUX2pac  = 184,
+  SERAUX3pac  = 200,
+  ENCODERpac  = 144,
+  TCM2pac     = 192,
+  IOpac       = 240,
+  IMUpac      = 154,
+  JOYSTICKpac = 248,
+  GRIPPERpac  = 224,
+  GYROpac     = 152,
+  ARMINFOpac  = 161,
+  ARMpac      = 160,
+}Sip_t;
 
 }
 
