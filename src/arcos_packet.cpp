@@ -168,45 +168,45 @@ unsigned char ArcosPacket::at(int i) const
     return buffer_[i+2];
 }
 
-int ArcosPacket::getIntegerAt(int i) const
+int ArcosPacket::getIntegerAt(int i, int &output) const
 {
   /* 15 ls-bits */
   if (i < 0 || i > buffer_[2] - 2)
     ROS_ERROR("Packet out of bounds, requested %i and size was %i", i, buffer_[2]-2);
   else
   {
-    int value = buffer_[i+2] | buffer_[i+3] << 8;
-    return (value);
+    output = buffer_[i+2] | buffer_[i+3] << 8;
+    return (i+2);
   }
 }
 
-std::string ArcosPacket::getStringAt(int i) const
+int ArcosPacket::getStringAt(int i, std::string &output) const
 {
   if (i < 0 || i > buffer_[2] - 2)
     ROS_ERROR("Packet out of bounds, requested %i and size was %i", i, buffer_[2]-2);
   else
   {
-    std::string msg;
+    output.clear();
     while (buffer_[i+2] != '\0' && i < buffer_[2] - 1)
     {
-      msg.append(reinterpret_cast<const char*>(&buffer_[i+2]),
+      output.append(reinterpret_cast<const char*>(&buffer_[i+2]),
           reinterpret_cast<const char*>(&buffer_[i+3]));
       i++;
     }
-    return msg;
+    return (i+1);
   }
 }
 
-std::string ArcosPacket::getStringAt(int i, size_t length) const
+int ArcosPacket::getStringAt(int i, size_t length, std::string &output) const
 {
   if (i < 0 || i > buffer_[2] - 2 || length > buffer_[2] - 2)
     ROS_ERROR("Packet out of bounds, requested %i, length was %i, size was %i,", i, length, buffer_[2]-2);
   else
   {
-    std::string msg;
-    msg.append(reinterpret_cast<const char*>(&buffer_[i+2]),
+    output.clear();
+    output.append(reinterpret_cast<const char*>(&buffer_[i+2]),
         reinterpret_cast<const char*>(&buffer_[i+length+2]));
-    return msg;
+    return (i+length+1);
   }
 }
 

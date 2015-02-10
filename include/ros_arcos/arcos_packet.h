@@ -115,24 +115,27 @@ public:
   /**
    * @brief getIntegerAt Returns the integer stored at the current and next byte.
    * @param i The first byte of the integer.
-   * @return The integer stored.
+   * @param output The value of the integer.
+   * @return The byte of the next stored value.
    */
-  int getIntegerAt(int i) const;
+  int getIntegerAt(int i, int &output) const;
   /**
    * @brief getStringAt Returns the string stored starting at the current byte
    * ending with a null character.
    * @param i The first byte of the string.
-   * @return The string stored.
+   * @param output The string stored in the bytes.
+   * @return The byte of the next stored value.
    */
-  std::string getStringAt(int i) const;
+  int getStringAt(int i, std::string &output) const;
   /**
    * @brief getStringAt Returns the string stored starting at the current byte
    * with a fixed length.
    * @param i The first byte of the string.
    * @param length The length of the string.
-   * @return The string stored.
+   * @param output The string stored in the bytes.
+   * @return The byte of the next stored value.
    */
-  std::string getStringAt(int i, size_t length) const;
+  int getStringAt(int i, size_t length, std::string& output) const;
   /**
    * @brief printHex Print to the ros console the Hexadecimal bytes of the package.
    */

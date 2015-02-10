@@ -154,7 +154,10 @@ TEST(ArcosPacket, Get_Integer_At_Accessor)
   EXPECT_EQ(pac.at(0), 6);                            // Size of packet
   EXPECT_EQ(pac.at(1), HOSTBAUD);                // The command
   EXPECT_EQ(pac.at(2), ARGINT);                  // The data type
-  EXPECT_EQ(pac.getIntegerAt(3), 22);                 // The Integer
+  int value, index;
+  index = pac.getIntegerAt(3, value);
+  EXPECT_EQ(value, 22);                 // The Integer
+  EXPECT_EQ(index, 5);                  // The index of the next values
 }
 
 TEST(ArcosPacket, Get_String_At_Length_Accessor)
@@ -165,7 +168,11 @@ TEST(ArcosPacket, Get_String_At_Length_Accessor)
   EXPECT_EQ(pac.at(1), TTY2);                    // The command
   EXPECT_EQ(pac.at(2), ARGSTR);                  // The data type
   EXPECT_EQ(pac.at(3), 4);                            // The size of the string
-  EXPECT_STREQ(pac.getStringAt(4,4).c_str(),"TEST");  // The String
+  std::string value;
+  int index;
+  index = pac.getStringAt(4, 4, value);
+  EXPECT_STREQ(value.c_str(),"TEST");  // The String
+  EXPECT_EQ(index, 9);
 }
 
 TEST(ArcosPacket, Get_String_At_Accessor)
@@ -177,7 +184,11 @@ TEST(ArcosPacket, Get_String_At_Accessor)
   EXPECT_EQ(pac.at(1), TTY2);
   EXPECT_EQ(pac.at(2), ARGSTR);
   EXPECT_EQ(pac.at(3), 15);
-  EXPECT_STREQ(pac.getStringAt(4).c_str(),test_str.c_str());
+  std::string value;
+  int index;
+  index = pac.getStringAt(4, value);
+  EXPECT_STREQ(value.c_str(), test_str.c_str());
+  EXPECT_EQ(index, 20);
 }
 
 int main(int argc, char **argv)

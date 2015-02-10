@@ -335,9 +335,10 @@ bool ArcosDriver::synchronize(ArcosPacket &packet)
 
 void ArcosDriver::parseSynchronizationPacket(const ArcosPacket &packet)
 {
-  name_ = packet.getStringAt(2);
-  type_ = packet.getStringAt(2+name_.size()+1);
-  subtype_ = packet.getStringAt(2+name_.size()+1+type_.size()+1);
+  int index = 2;
+  index = packet.getStringAt(index, name_);
+  index = packet.getStringAt(index, type_);
+  index = packet.getStringAt(index, subtype_);
 }
 
 void ArcosDriver::closeConnection()
