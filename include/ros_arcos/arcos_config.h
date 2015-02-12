@@ -53,10 +53,14 @@ class ArcosConfig
 public:
   ~ArcosConfig();
   bool loadFile(const std::string &filename);
+  bool getBool(const std::string &key) const;
+  int getInt(const std::string &key) const;
+  double getDouble(const std::string &key) const;
+  std::string getString(const std::string &key) const;
+  std::vector<int> getIntVector(const std::string &key) const;
+private:
   void parseFile();
   void parseLine(const std::string &line);
-  std::map<std::string, boost::any> configuration() const;
-private:
   std::string getSection(std::vector<std::string> strings);
   bool isBool(const std::string &input);
   bool toBool(const std::string &input);

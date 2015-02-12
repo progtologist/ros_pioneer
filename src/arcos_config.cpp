@@ -37,6 +37,7 @@
 *********************************************************************/
 
 #include <ros_arcos/arcos_config.h>
+#include <boost/exception/diagnostic_information.hpp>
 
 namespace ros_arcos{
 
@@ -54,6 +55,7 @@ bool ArcosConfig::loadFile(const std::string &filename)
   catch (std::exception &e) {
     ROS_ERROR("%s", e.what());
   }
+  this->parseFile();
 }
 
 void ArcosConfig::parseFile()
@@ -195,9 +197,94 @@ std::string ArcosConfig::getSection(std::vector<std::string> strings)
   return section;
 }
 
-std::map<std::string, boost::any> ArcosConfig::configuration() const
+bool ArcosConfig::getBool(const std::string &key) const
 {
-  return configuration_;
+  bool value;
+  std::map<std::string, boost::any>::const_iterator iter;
+  iter = configuration_.find(key);
+  try {
+    if (iter != configuration_.end())
+      value = boost::any_cast<bool>(iter->second);
+    else
+      ROS_ERROR("Key requested '%s' was not found", key.c_str());
+  }
+  catch (boost::exception &e) {
+    ROS_ERROR("Key requested is not bool, %s",
+              boost::diagnostic_information(e).c_str());
+  }
+  return (value);
+}
+
+int ArcosConfig::getInt(const std::string &key) const
+{
+  int value;
+  std::map<std::string, boost::any>::const_iterator iter;
+  iter = configuration_.find(key);
+  try {
+    if (iter != configuration_.end())
+      value = boost::any_cast<int>(iter->second);
+    else
+      ROS_ERROR("Key requested '%s' was not found", key.c_str());
+  }
+  catch (boost::exception &e) {
+    ROS_ERROR("Key requested is not integer, %s",
+              boost::diagnostic_information(e).c_str());
+  }
+  return (value);
+}
+
+double ArcosConfig::getDouble(const std::string &key) const
+{
+  double value;
+  std::map<std::string, boost::any>::const_iterator iter;
+  iter = configuration_.find(key);
+  try {
+    if (iter != configuration_.end())
+      value = boost::any_cast<double>(iter->second);
+    else
+      ROS_ERROR("Key requested '%s' was not found", key.c_str());
+  }
+  catch (boost::exception &e) {
+    ROS_ERROR("Key requested is not double, %s",
+              boost::diagnostic_information(e).c_str());
+  }
+  return (value);
+}
+
+std::string ArcosConfig::getString(const std::string &key) const
+{
+  std::string value;
+  std::map<std::string, boost::any>::const_iterator iter;
+  iter = configuration_.find(key);
+  try {
+    if (iter != configuration_.end())
+      value = boost::any_cast<std::string>(iter->second);
+    else
+      ROS_ERROR("Key requested '%s' was not found", key.c_str());
+  }
+  catch (boost::exception &e) {
+    ROS_ERROR("Key requested is not string, %s",
+              boost::diagnostic_information(e).c_str());
+  }
+  return (value);
+}
+
+std::vector<int> ArcosConfig::getIntVector(const std::string &key) const
+{
+  std::vector<int> value;
+  std::map<std::string, boost::any>::const_iterator iter;
+  iter = configuration_.find(key);
+  try {
+    if (iter != configuration_.end())
+      value = boost::any_cast<std::vector<int> >(iter->second);
+    else
+      ROS_ERROR("Key requested '%s' was not found", key.c_str());
+  }
+  catch (boost::exception &e) {
+    ROS_ERROR("Key requested is not a vector of integers, %s",
+              boost::diagnostic_information(e).c_str());
+  }
+  return (value);
 }
 
 }

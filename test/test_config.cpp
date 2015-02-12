@@ -54,19 +54,15 @@ TEST(ArcosConfig, FileParser)
   string open_path(package_path);
   open_path.append("/config/params/p3dx.p");
   con.loadFile(open_path);
-  con.parseFile();
-
-  map<string,any> config;
-  config = con.configuration();
-  bool holonomic = any_cast<bool>(config["General/Holonomic"]);
+  bool holonomic = con.getBool("General/Holonomic");
   EXPECT_EQ(holonomic, true);
-  int max_vel = any_cast<int>(config["General/MaxVelocity"]);
+  int max_vel = con.getInt("General/MaxVelocity");
   EXPECT_EQ(max_vel, 2200);
-  double grlr = any_cast<double>(config["General/RobotLengthRear"]);
+  double grlr = con.getDouble("General/RobotLengthRear");
   EXPECT_FLOAT_EQ(grlr, 301.0);
-  string v7va = any_cast<string>(config["Video 7/VideoAddress"]);
+  string v7va = con.getString("Video 7/VideoAddress");
   EXPECT_STREQ(v7va.c_str(), "192.168.0.90");
-  vector<int> sonar_0 = any_cast<vector<int> >(config["Sonar/SonarUnit 0"]);
+  vector<int> sonar_0 = con.getIntVector("Sonar/SonarUnit 0");
   EXPECT_EQ(sonar_0.size(), 9);
   EXPECT_EQ(sonar_0[0], 69);
 }
