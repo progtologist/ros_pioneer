@@ -1,5 +1,5 @@
 /*********************************************************************
-* arcos_driver.h
+* arcos_sip.h
 *
 * Software License Agreement (BSD License)
 *
@@ -36,52 +36,33 @@
 * Authors: Aris Synodinos
 *********************************************************************/
 
-#ifndef ARCOS_DRIVER_H
-#define ARCOS_DRIVER_H
+#ifndef ARCOS_SIP_H
+#define ARCOS_SIP_H
 
+#include <ros_arcos/arcos_commands.h>
 #include <ros_arcos/arcos_packet.h>
-#include <ros_arcos/arcos_config.h>
-#include <ros/ros.h>
-#include <deque>
-#include <termios.h>
 
 namespace ros_arcos{
 
-class ArcosDriver
+class ArcosSIP
 {
 public:
-  ArcosDriver();
-  ~ArcosDriver();
+  ArcosSIP();
 private:
-  bool initSerial(const std::string &serial_port);
-  bool initTCP(const std::string &hostname,
-               const int port);
-  void loadConfig(const std::string &filename);
-  bool getSerialSettings(termios &settings);
-  bool setSerialSettings(const termios &settings);
-  bool flushSerial();
-  bool getSerialDescriptorFlags(int &flags);
-  bool setSerialDescriptorFlags(int &flags);
-  bool getStatusFlags(int &flags);
-  bool setStatusFlags(const int &flags);
-  void setSerialSpeed(termios &settings, int baudrate);
-  bool synchronize(ArcosPacket &packet);
-  void parseSynchronizationPacket(const ArcosPacket &packet);
-  void closeConnection();
-
-  // Arcos Commands
-  void sendOpen();
-  void sendEnable(bool value);
-  void sendPulse();
-
-  std::deque<ArcosPacket> outgoing_packets_;
-  ArcosConfig config_;
-  int file_descriptor_;
-  std::string name_;
-  std::string type_;
-  std::string subtype_;
+  void identify(const ArcosPacket &packet) const;
+  void parseStandard(const ArcosPacket &packet) const;
+  void parseConfig(const ArcosPacket &packet) const;
+  void parseSERAUX(const ArcosPacket &packet) const;
+  void parseEncoder(const ArcosPacket &packet) const;
+  void parseTCM2(const ArcosPacket &packet) const;
+  void parseIO(const ArcosPacket &packet) const;
+  void parseIMU(const ArcosPacket &packet) const;
+  void parseJoystick(const ArcosPacket &packet) const;
+  void parseGripper(const ArcosPacket &packet) const;
+  void parseGyro(const ArcosPacket &packet) const;
+  void parseArmInfo(const ArcosPacket &packet) const;
+  void parseArm(const ArcosPacket &packet) const;
 };
 
 }
-
-#endif // ARCOS_DRIVER_H
+#endif // ARCOS_SIP_H

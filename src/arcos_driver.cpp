@@ -37,6 +37,7 @@
 *********************************************************************/
 
 #include <ros_arcos/arcos_driver.h>
+#include <ros/package.h>
 #include <fcntl.h>
 #include <netdb.h>
 #include <netinet/ip.h>
@@ -44,12 +45,32 @@
 
 namespace ros_arcos{
 
+ArcosDriver::ArcosDriver()
+{
+  ros::NodeHandle nh("~");
+  std::string serial_port, hostname;
+  int tcp_port;
+  nh.param("serial_port", serial_port, std::string("/dev/ttyS0"));
+  nh.param("hostname", hostname, std::string("localhost"));
+  nh.param("tcp_port", tcp_port, 8101);
+  // First Initialize Network Connection
+  if (!initTCP(hostname,tcp_port))
+    initSerial(serial_port);
+  sendOpen();
+  sendEnable(true);
+  sendPulse();
+  // load configuration file
+  std::string config_path = ros::package::getPath("ros_arcos");
+  config_path.append("/config/param/" + subtype_ + ".p");
+  this->loadConfig(config_path);
+}
+
 ArcosDriver::~ArcosDriver()
 {
   this->closeConnection();
 }
 
-bool ArcosDriver::initSerial(const std::string &port)
+bool ArcosDriver::initSerial(const std::string &serial_port)
 {
   file_descriptor_ = -1;
   int flags;
@@ -57,13 +78,13 @@ bool ArcosDriver::initSerial(const std::string &port)
   int cur_br = 0;
   termios newtio;
 
-  ROS_INFO("Openning serial port %s", port.c_str());
+  ROS_INFO("Openning serial port %s", serial_port.c_str());
 
-  file_descriptor_ = open(port.c_str(),
+  file_descriptor_ = open(serial_port.c_str(),
                           O_RDWR | O_SYNC | O_NONBLOCK, S_IRUSR | S_IWUSR);
   if (file_descriptor_ < 0)
   {
-    ROS_ERROR("Failed to open serial port %s", port.c_str());
+    ROS_ERROR("Failed to open serial port %s", serial_port.c_str());
     return false;
   }
 
@@ -93,13 +114,6 @@ bool ArcosDriver::initSerial(const std::string &port)
   }
   ROS_INFO("Synchronized");
   this->parseSynchronizationPacket(packet);
-  ros::Duration(0.2).sleep();
-  packet.command(OPEN);
-  packet.send(file_descriptor_);
-  ros::Duration(0.2).sleep();
-  packet.command(PULSE);
-  packet.send(file_descriptor_);
-  ros::Duration(0.2).sleep();
   ROS_INFO("Connected to a %s %s named %s",
            type_.c_str(),
            subtype_.c_str(),
@@ -163,18 +177,16 @@ bool ArcosDriver::initTCP(const std::string &hostname,
     ROS_ERROR("Could not synchronize, retrying");
   ROS_INFO("Synchronized");
   this->parseSynchronizationPacket(packet);
-  ros::Duration(0.2).sleep();
-  packet.command(OPEN);
-  packet.send(file_descriptor_);
-  ros::Duration(0.2).sleep();
-  packet.command(PULSE);
-  packet.send(file_descriptor_);
-  ros::Duration(0.2).sleep();
   ROS_INFO("Connected to a %s %s named %s",
            type_.c_str(),
            subtype_.c_str(),
            name_.c_str());
   return true;
+}
+
+void ArcosDriver::loadConfig(const std::string &filename)
+{
+  config_.loadFile(filename);
 }
 
 bool ArcosDriver::getSerialSettings(termios &settings)
@@ -355,6 +367,27 @@ void ArcosDriver::closeConnection()
 
   close(file_descriptor_);
   file_descriptor_ = -1;
+}
+
+void ArcosDriver::sendOpen()
+{
+  ArcosPacket packet;
+  packet.command(OPEN);
+  packet.send(file_descriptor_);
+}
+
+void ArcosDriver::sendEnable(bool value)
+{
+  ArcosPacket packet;
+  packet.command(ENABLE, static_cast<int>(value));
+  packet.send(file_descriptor_);
+}
+
+void ArcosDriver::sendPulse()
+{
+  ArcosPacket packet;
+  packet.command(PULSE);
+  packet.send(file_descriptor_);
 }
 
 }

@@ -46,7 +46,6 @@ TEST(ArcosDriver, Constructor)
 {
   ros::Time::init();
   ArcosDriver driver;
-  driver.initTCP("localhost", 8101);
 }
 
 int main(int argc, char **argv)
