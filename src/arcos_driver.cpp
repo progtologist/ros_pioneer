@@ -67,16 +67,16 @@ bool ArcosDriver::initSerial(const std::string &port)
     return false;
   }
 
-  if (!getSettings(newtio))
+  if (!getSerialSettings(newtio))
     return false;
 
   cfmakeraw(&newtio);
-  setSpeed(newtio, baudrates[cur_br]);
+  setSerialSpeed(newtio, baudrates[cur_br]);
 
-  if (!setSettings(newtio))
+  if (!setSerialSettings(newtio))
     return false;
 
-  if (!getDescriptorFlags(flags))
+  if (!getSerialDescriptorFlags(flags))
     return false;
 
   ArcosPacket packet;
@@ -88,8 +88,8 @@ bool ArcosDriver::initSerial(const std::string &port)
       ROS_ERROR("Could not initialize connection");
       return false;
     }
-    setSpeed(newtio,baudrates[cur_br]);
-    setSettings(newtio);
+    setSerialSpeed(newtio,baudrates[cur_br]);
+    setSerialSettings(newtio);
   }
   ROS_INFO("Synchronized");
   this->parseSynchronizationPacket(packet);
@@ -177,7 +177,7 @@ bool ArcosDriver::initTCP(const std::string &hostname,
   return true;
 }
 
-bool ArcosDriver::getSettings(termios &settings)
+bool ArcosDriver::getSerialSettings(termios &settings)
 {
   // Get the serial connection attributes
   int status;
@@ -190,7 +190,7 @@ bool ArcosDriver::getSettings(termios &settings)
   return true;
 }
 
-bool ArcosDriver::setSettings(const termios &settings)
+bool ArcosDriver::setSerialSettings(const termios &settings)
 {
   // Set the serial connection attributes
   int status;
@@ -219,7 +219,7 @@ bool ArcosDriver::flushSerial()
   return true;
 }
 
-bool ArcosDriver::getDescriptorFlags(int &flags)
+bool ArcosDriver::getSerialDescriptorFlags(int &flags)
 {
   // Get the flags
   flags = fcntl(file_descriptor_, F_GETFL);
@@ -231,7 +231,7 @@ bool ArcosDriver::getDescriptorFlags(int &flags)
   return true;
 }
 
-bool ArcosDriver::setDescriptorFlags(int &flags)
+bool ArcosDriver::setSerialDescriptorFlags(int &flags)
 {
   int status;
   status = fcntl(file_descriptor_, F_SETFL, flags);
@@ -266,7 +266,7 @@ bool ArcosDriver::setStatusFlags(const int &flags)
   return true;
 }
 
-void ArcosDriver::setSpeed(termios &settings, int baudrate)
+void ArcosDriver::setSerialSpeed(termios &settings, int baudrate)
 {
   cfsetispeed(&settings, baudrate);
   cfsetospeed(&settings, baudrate);
@@ -275,7 +275,7 @@ void ArcosDriver::setSpeed(termios &settings, int baudrate)
 bool ArcosDriver::synchronize(ArcosPacket &packet)
 {
   int flags;
-  this->getDescriptorFlags(flags);
+  this->getSerialDescriptorFlags(flags);
 
   enum {
     IDLE,
@@ -352,7 +352,6 @@ void ArcosDriver::closeConnection()
   packet.command(CLOSE);
   packet.send(file_descriptor_);
   ros::Duration(0.5).sleep();
-  flushSerial();
 
   close(file_descriptor_);
   file_descriptor_ = -1;

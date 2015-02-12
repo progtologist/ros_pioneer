@@ -58,29 +58,43 @@ bool ArcosConfig::loadFile(const std::string &filename)
 
 void ArcosConfig::parseFile()
 {
-
+  std::string line;
+  while (std::getline(file_, line))
+    this->parseLine(line);
 }
 
 void ArcosConfig::parseLine(const std::string &line)
 {
+  static std::string section;
   std::stringstream iss(line);
   std::string data;
-  std::string variable_name;
-  std::string variable_value;
   std::getline(iss, data, ';');
-  if (data.size() != 0) {
-    std::stringstream ss(data);
-    std::getline(ss, variable_name, ' ');
-    std::getline(ss, variable_value);
+  if (data.size() != 0 && !boost::starts_with(data, " ")) {
+    boost::trim(data);
+    std::vector<std::string> strings;
+    boost::split(strings,
+                 data,
+                 boost::is_any_of("\t "),
+                 boost::token_compress_on);
+    if (strings[0].compare("Section") == 0)
+      section = this->getSection(strings);
+    else {
+      if (strings.size() == 1) {
+        // No data to be added!
+      }
+      else if (strings.size() == 2) {
+        this->addToMap(section + strings[0], strings[1]);
+      }
+      else {
+        this->addToMap(section + strings[0] + " " + strings[1], strings);
+      }
+    }
   }
-  ROS_INFO("Name is: %s", variable_name.c_str());
-  ROS_INFO("Value is: %s", variable_value.c_str());
 }
 
 bool ArcosConfig::isBool(const std::string &input)
 {
-  std::string temp_in = input;
-  std::transform(temp_in.begin(), temp_in.end(), temp_in.begin(), ::tolower);
+  std::string temp_in = boost::to_lower_copy(input);
   if (temp_in.compare("true") == 0)
     return true;
   if (temp_in.compare("false")== 0)
@@ -90,8 +104,7 @@ bool ArcosConfig::isBool(const std::string &input)
 
 bool ArcosConfig::toBool(const std::string &input)
 {
-  std::string temp_in = input;
-  std::transform(temp_in.begin(), temp_in.end(), temp_in.begin(), ::tolower);
+  std::string temp_in = boost::to_lower_copy(input);
   std::istringstream is(temp_in);
   bool out;
   is >> std::boolalpha >> out;
@@ -101,9 +114,12 @@ bool ArcosConfig::toBool(const std::string &input)
 bool ArcosConfig::isInteger(const std::string &input)
 {
   bool decimal = false;
+  bool sign = false;
   for (size_t i = 0; i < input.size(); ++i) {
     if (input[i] == '.')
       return false;
+    else if (input[i] == '-' && !sign)
+      sign = true;
     else if (!std::isdigit(input[i]))
       return false;
   }
@@ -121,9 +137,12 @@ int ArcosConfig::toInteger(const std::string &input)
 bool ArcosConfig::isDouble(const std::string &input)
 {
   bool decimal = false;
+  bool sign = false;
   for (size_t i = 0; i < input.size(); ++i) {
     if (input[i] == '.' && !decimal)
       decimal = true;
+    else if (input[i] == '-' && !sign)
+      sign = true;
     else if (!std::isdigit(input[i]))
       return false;
   }
@@ -136,6 +155,49 @@ double ArcosConfig::toDouble(const std::string &input)
   double out;
   is >> out;
   return out;
+}
+
+std::vector<int> ArcosConfig::toVector(const std::vector<std::string> &input)
+{
+  std::vector<int> out;
+  for (int i = 2; i < input.size(); ++i)
+    out.push_back(this->toInteger(input[i]));
+  return out;
+}
+
+void ArcosConfig::addToMap(const std::string &key, const std::string &value)
+{
+  if (isBool(value))
+    configuration_[key] = toBool(value);
+  else if (isInteger(value))
+    configuration_[key] = toInteger(value);
+  else if (isDouble(value))
+    configuration_[key] = toDouble(value);
+  else
+    configuration_[key] = value;
+}
+
+void ArcosConfig::addToMap(const std::string &key,
+                           const std::vector<std::string> &value)
+{
+  configuration_[key] = toVector(value);
+}
+
+std::string ArcosConfig::getSection(std::vector<std::string> strings)
+{
+  std::string section(strings[1]);
+  if (strings.size() != 2) {
+    if (isInteger(strings[2])) {
+      section += " " + strings[2];
+    }
+  }
+  section.append("/");
+  return section;
+}
+
+std::map<std::string, boost::any> ArcosConfig::configuration() const
+{
+  return configuration_;
 }
 
 }

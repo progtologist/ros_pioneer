@@ -43,12 +43,10 @@
 #include <string>
 #include <fstream>
 #include <map>
-#include <algorithm>
-#include <boost/variant.hpp>
+#include <boost/any.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace ros_arcos{
-
-typedef boost::variant<bool, int, double, std::string> variant_t;
 
 class ArcosConfig
 {
@@ -57,17 +55,21 @@ public:
   bool loadFile(const std::string &filename);
   void parseFile();
   void parseLine(const std::string &line);
+  std::map<std::string, boost::any> configuration() const;
 private:
-
+  std::string getSection(std::vector<std::string> strings);
   bool isBool(const std::string &input);
   bool toBool(const std::string &input);
   bool isInteger(const std::string &input);
   int toInteger(const std::string &input);
   bool isDouble(const std::string &input);
   double toDouble(const std::string &input);
+  std::vector<int> toVector(const std::vector<std::string> &input);
+  void addToMap(const std::string &key, const std::string &value);
+  void addToMap(const std::string &key, const std::vector<std::string> &value);
 
   std::ifstream file_;
-  std::map<std::string, variant_t> configuration_;
+  std::map<std::string, boost::any> configuration_;
 };
 
 }

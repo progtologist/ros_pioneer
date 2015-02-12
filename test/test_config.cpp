@@ -38,22 +38,37 @@
 
 #include <gtest/gtest.h>
 #include <ros_arcos/arcos_config.h>
+#include <ros_arcos/config.h>
+#include <boost/exception/diagnostic_information.hpp>
+#include <boost/exception_ptr.hpp>
 
 using namespace ros_arcos;
 using namespace std;
+using boost::any;
+using boost::any_cast;
 
-TEST(ArcosConfig, LineParser)
+TEST(ArcosConfig, FileParser)
 {
   ArcosConfig con;
-  std::string test("GPSBaud 9600             ; gps baud rate (9600, 19200, 38400, etc.)");
-  con.parseLine(test);
-}
+  string package_path(PACKAGE_PATH);
+  string open_path(package_path);
+  open_path.append("/config/params/p3dx.p");
+  con.loadFile(open_path);
+  con.parseFile();
 
-TEST(ArcosConfig, LineCommentsParser)
-{
-  ArcosConfig con;
-  std::string test(";SectionFlags for GPS parameters: ");
-  con.parseLine(test);
+  map<string,any> config;
+  config = con.configuration();
+  bool holonomic = any_cast<bool>(config["General/Holonomic"]);
+  EXPECT_EQ(holonomic, true);
+  int max_vel = any_cast<int>(config["General/MaxVelocity"]);
+  EXPECT_EQ(max_vel, 2200);
+  double grlr = any_cast<double>(config["General/RobotLengthRear"]);
+  EXPECT_FLOAT_EQ(grlr, 301.0);
+  string v7va = any_cast<string>(config["Video 7/VideoAddress"]);
+  EXPECT_STREQ(v7va.c_str(), "192.168.0.90");
+  vector<int> sonar_0 = any_cast<vector<int> >(config["Sonar/SonarUnit 0"]);
+  EXPECT_EQ(sonar_0.size(), 9);
+  EXPECT_EQ(sonar_0[0], 69);
 }
 
 int main(int argc, char **argv)

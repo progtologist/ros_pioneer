@@ -1,5 +1,5 @@
 /*********************************************************************
-* arcos_driver.h
+* config.h.in
 *
 * Software License Agreement (BSD License)
 *
@@ -36,41 +36,10 @@
 * Authors: Aris Synodinos
 *********************************************************************/
 
-#ifndef ARCOS_DRIVER_H
-#define ARCOS_DRIVER_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
-#include <ros_arcos/arcos_packet.h>
-#include <ros/ros.h>
-#include <termios.h>
+/* for PACKAGE_PATH use */
+#cmakedefine PACKAGE_PATH "${PACKAGE_PATH}"
 
-namespace ros_arcos{
-
-class ArcosDriver
-{
-public:
-  ~ArcosDriver();
-  bool initSerial(const std::string &port);
-  bool initTCP(const std::string &hostname,
-               const int port);
-private:
-  bool getSerialSettings(termios &settings);
-  bool setSerialSettings(const termios &settings);
-  bool flushSerial();
-  bool getSerialDescriptorFlags(int &flags);
-  bool setSerialDescriptorFlags(int &flags);
-  bool getStatusFlags(int &flags);
-  bool setStatusFlags(const int &flags);
-  void setSerialSpeed(termios &settings, int baudrate);
-  bool synchronize(ArcosPacket &packet);
-  void parseSynchronizationPacket(const ArcosPacket &packet);
-  void closeConnection();
-
-  int file_descriptor_;
-  std::string name_;
-  std::string type_;
-  std::string subtype_;
-};
-
-}
-
-#endif // ARCOS_DRIVER_H
+#endif // CONFIG_H
