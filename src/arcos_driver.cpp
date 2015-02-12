@@ -46,8 +46,7 @@ namespace ros_arcos{
 
 ArcosDriver::~ArcosDriver()
 {
-  close(file_descriptor_);
-  file_descriptor_ = -1;
+  this->closeConnection();
 }
 
 bool ArcosDriver::initSerial(const std::string &port)
@@ -92,15 +91,15 @@ bool ArcosDriver::initSerial(const std::string &port)
     setSpeed(newtio,baudrates[cur_br]);
     setSettings(newtio);
   }
-
+  ROS_INFO("Synchronized");
   this->parseSynchronizationPacket(packet);
-  ros::Duration(0.5).sleep();
+  ros::Duration(0.2).sleep();
   packet.command(OPEN);
   packet.send(file_descriptor_);
-  ros::Duration(0.5).sleep();
+  ros::Duration(0.2).sleep();
   packet.command(PULSE);
   packet.send(file_descriptor_);
-  ros::Duration(0.5).sleep();
+  ros::Duration(0.2).sleep();
   ROS_INFO("Connected to a %s %s named %s",
            type_.c_str(),
            subtype_.c_str(),
@@ -162,7 +161,7 @@ bool ArcosDriver::initTCP(const std::string &hostname,
   ROS_INFO("Starting synchronization");
   while (!synchronize(packet))
     ROS_ERROR("Could not synchronize, retrying");
-  ROS_INFO("SYNCHRONIZED");
+  ROS_INFO("Synchronized");
   this->parseSynchronizationPacket(packet);
   ros::Duration(0.2).sleep();
   packet.command(OPEN);
