@@ -51,7 +51,6 @@ namespace ros_arcos{
 class ArcosConfig
 {
 public:
-  ~ArcosConfig();
   bool loadFile(const std::string &filename);
   bool getBool(const std::string &key) const;
   int getInt(const std::string &key) const;
@@ -59,7 +58,7 @@ public:
   std::string getString(const std::string &key) const;
   std::vector<int> getIntVector(const std::string &key) const;
 private:
-  void parseFile();
+  void parseFile(std::ifstream &file);
   void parseLine(const std::string &line);
   std::string getSection(std::vector<std::string> strings);
   bool isBool(const std::string &input);
@@ -72,7 +71,6 @@ private:
   void addToMap(const std::string &key, const std::string &value);
   void addToMap(const std::string &key, const std::vector<std::string> &value);
 
-  std::ifstream file_;
   std::map<std::string, boost::any> configuration_;
 };
 

@@ -41,27 +41,23 @@
 
 namespace ros_arcos{
 
-ArcosConfig::~ArcosConfig()
-{
-  if (file_.is_open())
-    file_.close();
-}
-
 bool ArcosConfig::loadFile(const std::string &filename)
 {
+  std::ifstream file;
   try{
-    file_.open(filename.c_str());
+    file.open(filename.c_str());
   }
   catch (std::exception &e) {
     ROS_ERROR("%s", e.what());
   }
-  this->parseFile();
+  this->parseFile(file);
+  file.close();
 }
 
-void ArcosConfig::parseFile()
+void ArcosConfig::parseFile(std::ifstream &file)
 {
   std::string line;
-  while (std::getline(file_, line))
+  while (std::getline(file, line))
     this->parseLine(line);
 }
 

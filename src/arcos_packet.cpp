@@ -197,7 +197,7 @@ int ArcosPacket::getStringAt(int i, std::string &output) const
   }
 }
 
-int ArcosPacket::getStringAt(int i, size_t length, std::string &output) const
+int ArcosPacket::getStringAt(int i, int length, std::string &output) const
 {
   if (i < 0 || i > buffer_[2] - 2 || length > buffer_[2] - 2)
     ROS_ERROR("Packet out of bounds, requested %i, length was %i, size was %i,", i, length, buffer_[2]-2);

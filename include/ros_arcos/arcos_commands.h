@@ -45,7 +45,7 @@ typedef enum
 {
   SYNC0     = 0,        // First syncronization packet
   SYNC1     = 1,        // Second syncronization packet
-  SYNC2     = 2,        // Third syncronization packet
+  SYNC2     = 2         // Third syncronization packet
 }Init_t;
 
 typedef enum
@@ -70,7 +70,7 @@ typedef enum
   SYSKILL_RECENTER = 119, // Recenter the wheels, then turns off the robot. (Seekur only)
   RECENTERWHEELS = 120, // Recenter the wheels. (Seekur only)
   RESET       = 253,    // Force a power on-like reset of the microcontroller.
-  MAINTENANCE = 255,    // Engage microcontroller maintenance (ARSHstub) mode.
+  MAINTENANCE = 255     // Engage microcontroller maintenance (ARSHstub) mode.
 }Void_t;
 
 typedef enum
@@ -91,7 +91,7 @@ typedef enum
   ARM_SPEED   = 78,     // Delay in milliseconds (2nd byte) between
                         // incremental steps to control the speed and motion
                         // of the joint (1st byte)
-  SEEKURPDB   = 116,    // Turn a Seekur PDB power port on or off. First byte
+  SEEKURPDB   = 116     // Turn a Seekur PDB power port on or off. First byte
                         // indicates which port, second byte indicates state
                         // (1=on, 0=off). See Power Supply for locations of
                         // power output connectors and typical devices
@@ -218,7 +218,7 @@ typedef enum
                         // tens volts (100=10V); 0 to revert to real voltage
   DIGTEMPTEST = 251,    // Artificially set the digital temperature; argument
                         // in degrees C; 0 to revert to real temperature.
-  ANTEMPTEST  = 252,    // Artificially set the analog temperature; argument
+  ANTEMPTEST  = 252     // Artificially set the analog temperature; argument
                         // in degrees C; 0 to revert to real temperature.
 }Int_t;
 
@@ -235,14 +235,14 @@ typedef enum
                         // bytes 3- = up to 20 chars, NULL-terminated.
   TTY4        = 60,     // Send string argument out to device connected at AUX3
                         // serial port.
-  TTY3        = 66,     // Send string argument out to device connected at AUX2
+  TTY3        = 66      // Send string argument out to device connected at AUX2
                         // serial port.
 }Str_t;
 
 typedef enum{
   ARGINT      = 59,     // Positive Integer
   ARGNINT     = 27,     // Negative or Unsigned Integer
-  ARGSTR      = 43,     // String Argument
+  ARGSTR      = 43      // String Argument
 }Types_t;
 
 typedef enum{
@@ -260,7 +260,7 @@ typedef enum{
   GRIPPERpac  = 224,
   GYROpac     = 152,
   ARMINFOpac  = 161,
-  ARMpac      = 160,
+  ARMpac      = 160
 }Sip_t;
 
 }

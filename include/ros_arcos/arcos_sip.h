@@ -39,16 +39,19 @@
 #ifndef ARCOS_SIP_H
 #define ARCOS_SIP_H
 
+#include <ros_arcos/arcos_config.h>
 #include <ros_arcos/arcos_commands.h>
 #include <ros_arcos/arcos_packet.h>
+#include <nav_msgs/Odometry.h>
 
 namespace ros_arcos{
 
 class ArcosSIP
 {
 public:
-  ArcosSIP();
+  ArcosSIP(const ArcosConfig &config);
 private:
+  // Direct Methods
   void identify(const ArcosPacket &packet) const;
   void parseStandard(const ArcosPacket &packet) const;
   void parseConfig(const ArcosPacket &packet) const;
@@ -62,6 +65,14 @@ private:
   void parseGyro(const ArcosPacket &packet) const;
   void parseArmInfo(const ArcosPacket &packet) const;
   void parseArm(const ArcosPacket &packet) const;
+
+  // Indirect Methods
+  static int encoderDifference(int previous, int current);
+  static double radToDegrees(double radians);
+  static double degreesToRad(double degrees);
+
+  ros::NodeHandle nh_;
+  ArcosConfig config_;
 };
 
 }

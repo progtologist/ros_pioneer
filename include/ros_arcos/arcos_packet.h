@@ -135,7 +135,7 @@ public:
    * @param output The string stored in the bytes.
    * @return The byte of the next stored value.
    */
-  int getStringAt(int i, size_t length, std::string& output) const;
+  int getStringAt(int i, int length, std::string& output) const;
   /**
    * @brief printHex Print to the ros console the Hexadecimal bytes of the package.
    */

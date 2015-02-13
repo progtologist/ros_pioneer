@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(ros_arcos)
 
-find_package(catkin REQUIRED COMPONENTS roscpp roslib tf)
+find_package(catkin REQUIRED
+             COMPONENTS roscpp roslib tf geometry_msgs nav_msgs)
 find_package(Boost REQUIRED COMPONENTS thread)
 
 catkin_package(

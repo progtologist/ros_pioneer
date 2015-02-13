@@ -37,10 +37,17 @@
 *********************************************************************/
 
 #include <ros_arcos/arcos_sip.h>
+#include <boost/math/constants/constants.hpp>
+#include <limits>
+#include <cmath>
+
+using nav_msgs::Odometry;
 
 namespace ros_arcos{
 
-ArcosSIP::ArcosSIP()
+ArcosSIP::ArcosSIP(const ArcosConfig &config) :
+  nh_("~"),
+  config_(config)
 {
 
 }
@@ -96,6 +103,40 @@ void ArcosSIP::identify(const ArcosPacket &packet) const
 
 void ArcosSIP::parseStandard(const ArcosPacket& packet) const
 {
+  static int total_x    = 0;
+  static int total_y    = 0;
+  static int total_th   = 0;
+  static int prev_x = 0;
+  static int prev_y = 0;
+  static double dist_conv_factor  = config_.getDouble("DistConvFactor");
+  static double angle_conv_factor = config_.getDouble("AngleConvFactor");
+  static double vel_conv_factor   = config_.getDouble("VelConvFactor");
+
+  int index = 2;
+  int curr_x, curr_y, curr_th;
+  int vel_l, vel_r;
+
+  if (total_x == std::numeric_limits<int>::max())
+    total_x = 0;
+  if (total_y == std::numeric_limits<int>::max())
+    total_y = 0;
+
+  index = packet.getIntegerAt(index, curr_x);
+  index = packet.getIntegerAt(index, curr_y);
+  index = packet.getIntegerAt(index, curr_th);
+  index = packet.getIntegerAt(index, vel_l);
+  index = packet.getIntegerAt(index, vel_r);
+
+  curr_x %= 4096;
+  curr_y %= 4096;
+
+  int diff_x = this->encoderDifference(prev_x, curr_x);
+  int diff_y = this->encoderDifference(prev_y, curr_y);
+  int change_x = static_cast<int>(round(diff_x * dist_conv_factor));
+  int change_y = static_cast<int>(round(diff_y * dist_conv_factor));
+  total_x += change_x;
+  total_y += change_y;
+  total_th = static_cast<int>(round(degreesToRad(curr_th * angle_conv_factor)));
 
 }
 
@@ -152,6 +193,28 @@ void ArcosSIP::parseArmInfo(const ArcosPacket& packet) const
 void ArcosSIP::parseArm(const ArcosPacket& packet) const
 {
 
+}
+
+int ArcosSIP::encoderDifference(int previous, int current)
+{
+  int diff = std::abs(current - previous);
+  int compl_diff = 4096 - diff;
+  if (current >= previous)
+    return (diff < compl_diff ? diff : compl_diff);
+  else
+    return (diff < compl_diff ? -diff : -compl_diff);
+}
+
+double ArcosSIP::radToDegrees(double radians)
+{
+  static const double PI = boost::math::constants::pi<double>();
+  return (radians * 180.0 / PI);
+}
+
+double ArcosSIP::degreesToRad(double degrees)
+{
+  static const double PI = boost::math::constants::pi<double>();
+  return (degrees * PI / 180.0);
 }
 
 }
