@@ -67,6 +67,24 @@ TEST(ArcosConfig, FileParser)
   EXPECT_EQ(sonar_0[0], 69);
 }
 
+TEST(ArcosConfig, Setters)
+{
+  ArcosConfig con;
+  con.setBool("First Test", true);
+  EXPECT_EQ(con.getBool("First Test"), true);
+  con.setInt("Second Test", 22);
+  EXPECT_EQ(con.getInt("Second Test"), 22);
+  con.setDouble("Third Test", 23.8556481);
+  EXPECT_FLOAT_EQ(con.getDouble("Third Test"), 23.8556481);
+  std::vector<int> final_test(3, 100);
+  con.setIntVector("Fourth Test", final_test);
+  std::vector<int> out = con.getIntVector("Fourth Test");
+
+  for (int i = 0; i < 3; ++i) {
+    EXPECT_EQ(out[i], 100);
+  }
+}
+
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);

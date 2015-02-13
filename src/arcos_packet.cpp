@@ -38,7 +38,7 @@
 
 #include <ros_arcos/arcos_packet.h>
 #include <cassert>
-#include  <fcntl.h>
+#include <fcntl.h>
 
 namespace ros_arcos{
 
@@ -210,6 +210,20 @@ int ArcosPacket::getStringAt(int i, int length, std::string &output) const
   }
 }
 
+int ArcosPacket::getBoolVectorAt(int i, std::vector<bool> &output) const
+{
+  if (i < 0 || i > buffer_[2] - 2)
+    ROS_ERROR("Packet out of bounds, requested %i and size was %i", i, buffer_[2]-2);
+  else
+  {
+    output.clear();
+    for (int j = 0; j < 8; j++) {
+      output.push_back(getBit(buffer_[i+2], j));
+    }
+    return (i+1);
+  }
+}
+
 bool ArcosPacket::check()
 {
   int checksum = this->calculateChecksum();
@@ -321,6 +335,11 @@ void ArcosPacket::setChecksum()
   int checksum = this->calculateChecksum();
   buffer_[buffer_size+1] = checksum >> 8;
   buffer_[buffer_size+2] = checksum & 0xFF;
+}
+
+bool ArcosPacket::getBit(unsigned char byte, int position) const
+{
+  return (byte >> position) & 0x01;
 }
 
 }

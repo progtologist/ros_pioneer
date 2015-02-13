@@ -211,6 +211,11 @@ bool ArcosConfig::getBool(const std::string &key) const
   return (value);
 }
 
+void ArcosConfig::setBool(const std::string &key, bool value)
+{
+  configuration_[key] = value;
+}
+
 int ArcosConfig::getInt(const std::string &key) const
 {
   int value;
@@ -227,6 +232,11 @@ int ArcosConfig::getInt(const std::string &key) const
               boost::diagnostic_information(e).c_str());
   }
   return (value);
+}
+
+void ArcosConfig::setInt(const std::string &key, int value)
+{
+  configuration_[key] = value;
 }
 
 double ArcosConfig::getDouble(const std::string &key) const
@@ -247,6 +257,11 @@ double ArcosConfig::getDouble(const std::string &key) const
   return (value);
 }
 
+void ArcosConfig::setDouble(const std::string &key, double value)
+{
+  configuration_[key] = value;
+}
+
 std::string ArcosConfig::getString(const std::string &key) const
 {
   std::string value;
@@ -265,6 +280,11 @@ std::string ArcosConfig::getString(const std::string &key) const
   return (value);
 }
 
+void ArcosConfig::setString(const std::string &key, const std::string &value)
+{
+  configuration_[key] = value;
+}
+
 std::vector<int> ArcosConfig::getIntVector(const std::string &key) const
 {
   std::vector<int> value;
@@ -281,6 +301,11 @@ std::vector<int> ArcosConfig::getIntVector(const std::string &key) const
               boost::diagnostic_information(e).c_str());
   }
   return (value);
+}
+
+void ArcosConfig::setIntVector(const std::string &key, const std::vector<int> &value)
+{
+  configuration_[key] = value;
 }
 
 }

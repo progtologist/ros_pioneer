@@ -111,10 +111,23 @@ void ArcosSIP::parseStandard(const ArcosPacket& packet) const
   static double dist_conv_factor  = config_.getDouble("DistConvFactor");
   static double angle_conv_factor = config_.getDouble("AngleConvFactor");
   static double vel_conv_factor   = config_.getDouble("VelConvFactor");
+  static double diff_conv_factor  = config_.getDouble("DiffConvFactor");
+  static bool front_bumpers       = config_.getBool("FrontBumpers");
+  static bool rear_bumpers        = config_.getBool("RearBumpers");
+  static int num_front_bumpers    = config_.getInt("NumFrontBumpers");
+  static int num_rear_bumpers     = config_.getInt("NumRearBumpers");
 
   int index = 2;
   int curr_x, curr_y, curr_th;
   int vel_l, vel_r;
+  unsigned char batt;
+  std::vector<bool> l_stall_bump;
+  std::vector<bool> r_stall_bump;
+  int control;
+  std::vector<bool> flags_0_7;
+  std::vector<bool> flags_8_15;
+  unsigned char compass;
+  unsigned char sonar_count;
 
   if (total_x == std::numeric_limits<int>::max())
     total_x = 0;
@@ -126,6 +139,14 @@ void ArcosSIP::parseStandard(const ArcosPacket& packet) const
   index = packet.getIntegerAt(index, curr_th);
   index = packet.getIntegerAt(index, vel_l);
   index = packet.getIntegerAt(index, vel_r);
+  batt = packet.at(index++);
+  index = packet.getBoolVectorAt(index, l_stall_bump);
+  index = packet.getBoolVectorAt(index, r_stall_bump);
+  index = packet.getIntegerAt(index, control);
+  index = packet.getBoolVectorAt(index, flags_0_7);
+  index = packet.getBoolVectorAt(index, flags_8_15);
+  compass = packet.at(index++);
+  sonar_count = packet.at(index++);
 
   curr_x %= 4096;
   curr_y %= 4096;

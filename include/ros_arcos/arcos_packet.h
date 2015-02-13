@@ -137,6 +137,14 @@ public:
    */
   int getStringAt(int i, int length, std::string& output) const;
   /**
+   * @brief getBoolVectorAt Returns the vector of bools stored at
+   * the current byte
+   * @param i The byte to be read
+   * @param output The vector of bools
+   * @return The byte of the next stored value.
+   */
+  int getBoolVectorAt(int i, std::vector<bool> &output) const;
+  /**
    * @brief printHex Print to the ros console the Hexadecimal bytes of the package.
    */
   void printHex();
@@ -160,7 +168,7 @@ protected:
                    unsigned char second_byte);
   void setArgument(const std::string &argument);
   void setChecksum();
-
+  bool getBit(unsigned char byte, int position) const;
   // Variables
   unsigned char buffer_[207];
 };

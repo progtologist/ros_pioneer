@@ -53,10 +53,15 @@ class ArcosConfig
 public:
   bool loadFile(const std::string &filename);
   bool getBool(const std::string &key) const;
+  void setBool(const std::string &key, bool value);
   int getInt(const std::string &key) const;
+  void setInt(const std::string &key, int value);
   double getDouble(const std::string &key) const;
+  void setDouble(const std::string &key, double value);
   std::string getString(const std::string &key) const;
+  void setString(const std::string &key, const std::string &value);
   std::vector<int> getIntVector(const std::string &key) const;
+  void setIntVector(const std::string &key, const std::vector<int> &value);
 private:
   void parseFile(std::ifstream &file);
   void parseLine(const std::string &line);

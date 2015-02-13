@@ -178,8 +178,7 @@ TEST(ArcosPacket, Get_String_At_Length_Accessor)
 TEST(ArcosPacket, Get_String_At_Accessor)
 {
   ArcosPacket pac;
-  std::string test_str("NULL TERMINATED");
-  pac.command(TTY2, test_str.c_str());
+  pac.command(TTY2, "NULL TERMINATED");
   EXPECT_EQ(pac.at(0), 20);
   EXPECT_EQ(pac.at(1), TTY2);
   EXPECT_EQ(pac.at(2), ARGSTR);
@@ -187,8 +186,27 @@ TEST(ArcosPacket, Get_String_At_Accessor)
   std::string value;
   int index;
   index = pac.getStringAt(4, value);
-  EXPECT_STREQ(value.c_str(), test_str.c_str());
+  EXPECT_STREQ(value.c_str(), "NULL TERMINATED");
   EXPECT_EQ(index, 20);
+}
+
+TEST(ArcosPacket, Get_Bool_Vector_At_Accessor)
+{
+  ArcosPacket pac;
+  pac.command(ENABLE, 21); // Just for testing
+  std::vector<bool> value;
+  int index;
+  index = pac.getBoolVectorAt(3, value);
+  EXPECT_EQ(index, 4);
+  EXPECT_EQ(value.size(), 8);
+  EXPECT_EQ(value[0], 1);
+  EXPECT_EQ(value[1], 0);
+  EXPECT_EQ(value[2], 1);
+  EXPECT_EQ(value[3], 0);
+  EXPECT_EQ(value[4], 1);
+  EXPECT_EQ(value[5], 0);
+  EXPECT_EQ(value[6], 0);
+  EXPECT_EQ(value[7], 0);
 }
 
 int main(int argc, char **argv)
