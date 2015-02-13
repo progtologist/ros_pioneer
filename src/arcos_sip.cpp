@@ -106,8 +106,8 @@ void ArcosSIP::parseStandard(const ArcosPacket& packet) const
   static int total_x    = 0;
   static int total_y    = 0;
   static int total_th   = 0;
-  static int prev_x = 0;
-  static int prev_y = 0;
+  static int prev_x     = 0;
+  static int prev_y     = 0;
   static double dist_conv_factor  = config_.getDouble("DistConvFactor");
   static double angle_conv_factor = config_.getDouble("AngleConvFactor");
   static double vel_conv_factor   = config_.getDouble("VelConvFactor");
@@ -132,6 +132,8 @@ void ArcosSIP::parseStandard(const ArcosPacket& packet) const
 
   int diff_x = this->encoderDifference(prev_x, curr_x);
   int diff_y = this->encoderDifference(prev_y, curr_y);
+  prev_x = curr_x;
+  prev_y = curr_y;
   int change_x = static_cast<int>(round(diff_x * dist_conv_factor));
   int change_y = static_cast<int>(round(diff_y * dist_conv_factor));
   total_x += change_x;
