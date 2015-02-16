@@ -103,6 +103,7 @@ void ArcosSIP::identify(const ArcosPacket &packet) const
 
 void ArcosSIP::parseStandard(const ArcosPacket& packet) const
 {
+  typedef std::pair<unsigned char, int> sonar_t;
   static int total_x    = 0;
   static int total_y    = 0;
   static int total_th   = 0;
@@ -128,6 +129,14 @@ void ArcosSIP::parseStandard(const ArcosPacket& packet) const
   std::vector<bool> flags_8_15;
   unsigned char compass;
   unsigned char sonar_count;
+  std::vector<sonar_t> sonar_readings;
+  unsigned char grip_state;
+  unsigned char analog_port;
+  unsigned char analog_reading;
+  unsigned char digital_in;
+  unsigned char digital_out;
+  int battery; // Useful when batt > 255
+  unsigned char charge_state;
 
   if (total_x == std::numeric_limits<int>::max())
     total_x = 0;
@@ -147,6 +156,19 @@ void ArcosSIP::parseStandard(const ArcosPacket& packet) const
   index = packet.getBoolVectorAt(index, flags_8_15);
   compass = packet.at(index++);
   sonar_count = packet.at(index++);
+  for (int i = 0; i < sonar_count; ++i) {
+    sonar_t sonar_reading;
+    sonar_reading.first = packet.at(index++);
+    index = packet.getIntegerAt(index, sonar_reading.second);
+    sonar_readings.push_back(sonar_reading);
+  }
+  grip_state = packet.at(index++);
+  analog_port = packet.at(index++);
+  analog_reading = packet.at(index++);
+  digital_in = packet.at(index++);
+  digital_out = packet.at(index++);
+  index = packet.getIntegerAt(index, battery);
+  charge_state = packet.at(index);
 
   curr_x %= 4096;
   curr_y %= 4096;
@@ -165,6 +187,98 @@ void ArcosSIP::parseStandard(const ArcosPacket& packet) const
 
 void ArcosSIP::parseConfig(const ArcosPacket& packet) const
 {
+  int index = 2;
+  std::string robot_type;
+  std::string robot_subtype;
+  std::string robot_serial_number;
+  unsigned char four_motors;
+  int top_rot_vel;
+  int top_trans_vel;
+  int top_rot_acc;
+  int top_trans_acc;
+  int max_pwm;
+  std::string robot_name;
+  unsigned char sip_cycle;
+  unsigned char host_baud;
+  unsigned char aux_baud;
+  int gripper;
+  int front_sonar;
+  unsigned char rear_sonar;
+  int low_battery;
+  int rev_count;
+  int watchdog;
+  unsigned char p2mpacs;
+  int stall_value, stall_count;
+  int joy_vel, joy_rvel;
+  int max_rot_vel, max_trans_vel;
+  int rot_accel, rot_decel;
+  int rot_kp, rot_kv, rot_ki;
+  int trans_accel, trans_decel;
+  int trans_kp, trans_kv, trans_ki;
+  unsigned char front_bumpers, rear_bumpers;
+  unsigned char charger;
+  unsigned char sonar_cycle;
+  unsigned char autobaud;
+  unsigned char has_gyro;
+  int drift_factor;
+  unsigned char aux2_baud, aux3_baud;
+  int ticks_mm;
+  int shutdown_volts;
+  std::string major_version, minor_version;
+  int charge_threshold;
+
+  index = packet.getStringAt(index, robot_type);
+  index = packet.getStringAt(index, robot_subtype);
+  index = packet.getStringAt(index, robot_serial_number);
+  four_motors = packet.at(index++);
+  index = packet.getIntegerAt(index, top_rot_vel);
+  index = packet.getIntegerAt(index, top_trans_vel);
+  index = packet.getIntegerAt(index, top_rot_acc);
+  index = packet.getIntegerAt(index, top_trans_acc);
+  index = packet.getIntegerAt(index, max_pwm);
+  index = packet.getStringAt(index, robot_name);
+  sip_cycle = packet.at(index++);
+  host_baud = packet.at(index++);
+  aux_baud  = packet.at(index++);
+  index = packet.getIntegerAt(index, gripper);
+  index = packet.getIntegerAt(index, front_sonar);
+  rear_sonar = packet.at(index++);
+  index = packet.getIntegerAt(index, low_battery);
+  index = packet.getIntegerAt(index, rev_count);
+  index = packet.getIntegerAt(index, watchdog);
+  p2mpacs = packet.at(index++);
+  index = packet.getIntegerAt(index, stall_value);
+  index = packet.getIntegerAt(index, stall_count);
+  index = packet.getIntegerAt(index, joy_vel);
+  index = packet.getIntegerAt(index, joy_rvel);
+  index = packet.getIntegerAt(index, max_rot_vel);
+  index = packet.getIntegerAt(index, max_trans_vel);
+  index = packet.getIntegerAt(index, rot_accel);
+  index = packet.getIntegerAt(index, rot_decel);
+  index = packet.getIntegerAt(index, rot_kp);
+  index = packet.getIntegerAt(index, rot_kv);
+  index = packet.getIntegerAt(index, rot_ki);
+  index = packet.getIntegerAt(index, trans_accel);
+  index = packet.getIntegerAt(index, trans_decel);
+  index = packet.getIntegerAt(index, trans_kp);
+  index = packet.getIntegerAt(index, trans_kv);
+  index = packet.getIntegerAt(index, trans_ki);
+  front_bumpers = packet.at(index++);
+  rear_bumpers = packet.at(index++);
+  charger = packet.at(index++);
+  sonar_cycle = packet.at(index++);
+  autobaud = packet.at(index++);
+  has_gyro = packet.at(index++);
+  index = packet.getIntegerAt(index, drift_factor);
+  aux2_baud = packet.at(index++);
+  aux3_baud = packet.at(index++);
+  index = packet.getIntegerAt(index, ticks_mm);
+  index = packet.getIntegerAt(index, shutdown_volts);
+  // Check version
+  index = packet.getStringAt(index, major_version);
+  index = packet.getStringAt(index, minor_version);
+  index = packet.getIntegerAt(index, charge_threshold);
+
 
 }
 
