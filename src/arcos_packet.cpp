@@ -85,6 +85,30 @@ void ArcosPacket::command(const TwoBytes_t &command,
   this->setChecksum();
 }
 
+void ArcosPacket::command(const TwoBytes_t &command,
+                          const std::vector<bool> first_byte,
+                          const std::vector<bool> second_byte)
+{
+  if (first_byte.size() > 8)
+    ROS_ERROR("The first byte must be at most 8 bit, size was %lu", first_byte.size());
+  if (second_byte.size() > 8)
+    ROS_ERROR("The second byte must be at most 8 bit, size was %lu", second_byte.size());
+  this->clear();
+  this->setHeader();
+  this->setSize(6);
+  this->setCommand(static_cast<unsigned char>(command));
+  this->setType(ARGINT);
+  unsigned char a = 0u, b = 0u;
+  for (size_t i = 0; i < first_byte.size(); ++i) {
+    setBit(first_byte[i], i, a);
+  }
+  for (size_t i = 0; i < second_byte.size(); ++i) {
+    setBit(second_byte[i], i, b);
+  }
+  this->setArgument(a,b);
+  this->setChecksum();
+}
+
 void ArcosPacket::command(const Str_t &command,
                           const std::string &msg)
 {
@@ -170,7 +194,22 @@ unsigned char ArcosPacket::at(int i) const
 
 int ArcosPacket::getIntegerAt(int i, int &output) const
 {
-  /* 15 ls-bits */
+  /* 15 ls-bits and 1 bit sign */
+  if (i < 0 || i > buffer_[2] - 2)
+    ROS_ERROR("Packet out of bounds, requested %i and size was %i", i, buffer_[2]-2);
+  else
+  {
+    unsigned int number = buffer_[i+2] | buffer_[i+3] << 8;
+    output = number & ~(1u << 15);
+    if (getBit(buffer_[i+3],7) == 1)
+      output = - output;
+    return (i+2);
+  }
+}
+
+int ArcosPacket::getUnsignedAt(int i, int &output) const
+{
+  /* 16 ls-bits */
   if (i < 0 || i > buffer_[2] - 2)
     ROS_ERROR("Packet out of bounds, requested %i and size was %i", i, buffer_[2]-2);
   else
@@ -340,6 +379,11 @@ void ArcosPacket::setChecksum()
 bool ArcosPacket::getBit(unsigned char byte, int position) const
 {
   return (byte >> position) & 0x01;
+}
+
+void ArcosPacket::setBit(bool bit, int position, unsigned char &output) const
+{
+  output |= (bit << position);
 }
 
 }

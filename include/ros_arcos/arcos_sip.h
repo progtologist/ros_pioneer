@@ -73,6 +73,7 @@ private:
 
   ros::NodeHandle nh_;
   ArcosConfig config_;
+  float arcos_version_;
 };
 
 }

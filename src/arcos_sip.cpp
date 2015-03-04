@@ -47,6 +47,7 @@ namespace ros_arcos{
 
 ArcosSIP::ArcosSIP(const ArcosConfig &config) :
   nh_("~"),
+  arcos_version_(1.0),
   config_(config)
 {
 
@@ -224,8 +225,9 @@ void ArcosSIP::parseConfig(const ArcosPacket& packet) const
   unsigned char aux2_baud, aux3_baud;
   int ticks_mm;
   int shutdown_volts;
-  std::string major_version, minor_version;
-  int charge_threshold;
+  std::string version;
+  int gyro_cw, gyro_ccw;
+  unsigned char kinematics_delay;
 
   index = packet.getStringAt(index, robot_type);
   index = packet.getStringAt(index, robot_subtype);
@@ -275,16 +277,21 @@ void ArcosSIP::parseConfig(const ArcosPacket& packet) const
   index = packet.getIntegerAt(index, ticks_mm);
   index = packet.getIntegerAt(index, shutdown_volts);
   // Check version
-  index = packet.getStringAt(index, major_version);
-  index = packet.getStringAt(index, minor_version);
-  index = packet.getIntegerAt(index, charge_threshold);
-
-
+  if (packet.at(index) != '\0') {
+    index = packet.getStringAt(index, version);
+    index = packet.getIntegerAt(index, gyro_cw);
+    index = packet.getIntegerAt(index, gyro_ccw);
+    kinematics_delay = packet.at(index++);
+  }
 }
 
 void ArcosSIP::parseSERAUX(const ArcosPacket& packet) const
 {
+  int size = static_cast<int>(packet.at(0)) - 2;
+  std::string serial_message;
 
+  int index = 2;
+  index = packet.getStringAt(index, size, serial_message);
 }
 
 void ArcosSIP::parseEncoder(const ArcosPacket& packet) const

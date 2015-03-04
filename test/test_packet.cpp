@@ -106,7 +106,7 @@ TEST(ArcosPacket, Int_Commands)
   EXPECT_EQ(pac[8],0x3B);
 }
 
-TEST(ArcosPacket, TwoBytes_Commands)
+TEST(ArcosPacket, TwoBytes_Char_Commands)
 {
   ArcosPacket pac;
   pac.command(ARM_POS, 25, 3);
@@ -119,6 +119,27 @@ TEST(ArcosPacket, TwoBytes_Commands)
   EXPECT_EQ(pac[6],0x03);
   EXPECT_EQ(pac[7],0x66);
   EXPECT_EQ(pac[8],0x3E);
+}
+
+TEST(ArcosPacket, TwoBytes_Vector_Commands)
+{
+  ArcosPacket pac;
+  std::vector<bool> f_byte(8,0);
+  f_byte[0] = 1;
+  f_byte[2] = 1;
+  std::vector<bool> s_byte(4,0);
+  s_byte[1] = 1;
+  s_byte[3] = 1;
+  pac.command(DIGOUT, f_byte, s_byte);
+  EXPECT_EQ(pac[0],0xFA);
+  EXPECT_EQ(pac[1],0xFB);
+  EXPECT_EQ(pac[2],0x06);
+  EXPECT_EQ(pac[3],0x1E);
+  EXPECT_EQ(pac[4],0x3B);
+  EXPECT_EQ(pac[5],0x05);
+  EXPECT_EQ(pac[6],0x0A);
+  EXPECT_EQ(pac[7],0x23);
+  EXPECT_EQ(pac[8],0x45);
 }
 
 TEST(ArcosPacket, String_Commands)
@@ -147,17 +168,30 @@ TEST(ArcosPacket, At_Accessor)
   EXPECT_EQ(pac.at(1),0x00);
 }
 
+TEST(ArcosPacket, Get_Unsigned_Integer_At_Accessor)
+{
+  ArcosPacket pac;
+  pac.command(HOSTBAUD, 40000);     // Value larger than 32767
+  EXPECT_EQ(pac.at(0), 6);          // Size of packet
+  EXPECT_EQ(pac.at(1), HOSTBAUD);   // The command
+  EXPECT_EQ(pac.at(2), ARGINT);     // The data type
+  int value, index;
+  index = pac.getUnsignedAt(3, value);
+  EXPECT_EQ(value, 40000);          // The Integer
+  EXPECT_EQ(index, 5);              // The index of the next values
+}
+
 TEST(ArcosPacket, Get_Integer_At_Accessor)
 {
   ArcosPacket pac;
-  pac.command(HOSTBAUD, 22);
-  EXPECT_EQ(pac.at(0), 6);                            // Size of packet
-  EXPECT_EQ(pac.at(1), HOSTBAUD);                // The command
-  EXPECT_EQ(pac.at(2), ARGINT);                  // The data type
+  pac.command(HOSTBAUD, 300);
+  EXPECT_EQ(pac.at(0), 6);          // Size of packet
+  EXPECT_EQ(pac.at(1), HOSTBAUD);   // The command
+  EXPECT_EQ(pac.at(2), ARGINT);     // The data type
   int value, index;
   index = pac.getIntegerAt(3, value);
-  EXPECT_EQ(value, 22);                 // The Integer
-  EXPECT_EQ(index, 5);                  // The index of the next values
+  EXPECT_EQ(value, 300);            // The Integer
+  EXPECT_EQ(index, 5);              // The index of the next values
 }
 
 TEST(ArcosPacket, Get_String_At_Length_Accessor)

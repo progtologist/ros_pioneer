@@ -77,6 +77,15 @@ public:
                unsigned char first_byte,
                unsigned char second_byte);
   /**
+   * @brief command Create a packet with a command that takes a two byte argument
+   * @param command The command that the packet contains.
+   * @param first_byte The vector of bits that create the first byte.
+   * @param second_byte The vector of bits that create the second byte.
+   */
+  void command(const TwoBytes_t &command,
+               const std::vector<bool> first_byte,
+               const std::vector<bool> second_byte);
+  /**
    * @brief command Create a packet with a command that takes a string argument
    * @param command The command that the packet contains.
    * @param msg The string argument of the command.
@@ -120,6 +129,14 @@ public:
    */
   int getIntegerAt(int i, int &output) const;
   /**
+   * @brief getUnsignedAt Returns the unsigned int stored at the current and
+   * next byte.
+   * @param i The first byte of the integer.
+   * @param output The value of the integer
+   * @return The byte of the next stored value.
+   */
+  int getUnsignedAt(int i, int &output) const;
+  /**
    * @brief getStringAt Returns the string stored starting at the current byte
    * ending with a null character.
    * @param i The first byte of the string.
@@ -145,7 +162,8 @@ public:
    */
   int getBoolVectorAt(int i, std::vector<bool> &output) const;
   /**
-   * @brief printHex Print to the ros console the Hexadecimal bytes of the package.
+   * @brief printHex Print to the ros console the Hexadecimal bytes of
+   * the package.
    */
   void printHex();
   /**
@@ -169,6 +187,7 @@ protected:
   void setArgument(const std::string &argument);
   void setChecksum();
   bool getBit(unsigned char byte, int position) const;
+  void setBit(bool bit, int position, unsigned char &output) const;
   // Variables
   unsigned char buffer_[207];
 };
