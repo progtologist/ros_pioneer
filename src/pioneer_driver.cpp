@@ -1,5 +1,5 @@
 /*********************************************************************
-* arcos_driver.h
+* pioneer_driver.h
 *
 * Software License Agreement (BSD License)
 *
@@ -36,16 +36,16 @@
 * Authors: Aris Synodinos
 *********************************************************************/
 
-#include <ros_arcos/arcos_driver.h>
+#include <ros_pioneer/pioneer_driver.h>
 #include <ros/package.h>
 #include <fcntl.h>
 #include <netdb.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
 
-namespace ros_arcos{
+namespace ros_pioneer {
 
-ArcosDriver::ArcosDriver()
+PioneerDriver::PioneerDriver()
 {
   ros::NodeHandle nh("~");
   std::string serial_port, hostname;
@@ -60,17 +60,17 @@ ArcosDriver::ArcosDriver()
   sendEnable(true);
   sendPulse();
   // load configuration file
-  std::string config_path = ros::package::getPath("ros_arcos");
+  std::string config_path = ros::package::getPath("ros_pioneer");
   config_path.append("/config/param/" + subtype_ + ".p");
   this->loadConfig(config_path);
 }
 
-ArcosDriver::~ArcosDriver()
+PioneerDriver::~PioneerDriver()
 {
   this->closeConnection();
 }
 
-bool ArcosDriver::initSerial(const std::string &serial_port)
+bool PioneerDriver::initSerial(const std::string &serial_port)
 {
   file_descriptor_ = -1;
   int flags;
@@ -100,7 +100,7 @@ bool ArcosDriver::initSerial(const std::string &serial_port)
   if (!getSerialDescriptorFlags(flags))
     return false;
 
-  ArcosPacket packet;
+  PioneerPacket packet;
   while (!synchronize(packet))
   {
     cur_br++;
@@ -121,7 +121,7 @@ bool ArcosDriver::initSerial(const std::string &serial_port)
   return true;
 }
 
-bool ArcosDriver::initTCP(const std::string &hostname,
+bool PioneerDriver::initTCP(const std::string &hostname,
                           const int port)
 {
   file_descriptor_ = -1;
@@ -171,7 +171,7 @@ bool ArcosDriver::initTCP(const std::string &hostname,
     closeConnection();
   }
 
-  ArcosPacket packet;
+  PioneerPacket packet;
   ROS_INFO("Starting synchronization");
   while (!synchronize(packet))
     ROS_ERROR("Could not synchronize, retrying");
@@ -184,12 +184,12 @@ bool ArcosDriver::initTCP(const std::string &hostname,
   return true;
 }
 
-void ArcosDriver::loadConfig(const std::string &filename)
+void PioneerDriver::loadConfig(const std::string &filename)
 {
   config_.loadFile(filename);
 }
 
-bool ArcosDriver::getSerialSettings(termios &settings)
+bool PioneerDriver::getSerialSettings(termios &settings)
 {
   // Get the serial connection attributes
   int status;
@@ -202,7 +202,7 @@ bool ArcosDriver::getSerialSettings(termios &settings)
   return true;
 }
 
-bool ArcosDriver::setSerialSettings(const termios &settings)
+bool PioneerDriver::setSerialSettings(const termios &settings)
 {
   // Set the serial connection attributes
   int status;
@@ -218,7 +218,7 @@ bool ArcosDriver::setSerialSettings(const termios &settings)
   return true;
 }
 
-bool ArcosDriver::flushSerial()
+bool PioneerDriver::flushSerial()
 {
   int status;
   // Flush the input and output streams
@@ -231,7 +231,7 @@ bool ArcosDriver::flushSerial()
   return true;
 }
 
-bool ArcosDriver::getSerialDescriptorFlags(int &flags)
+bool PioneerDriver::getSerialDescriptorFlags(int &flags)
 {
   // Get the flags
   flags = fcntl(file_descriptor_, F_GETFL);
@@ -243,7 +243,7 @@ bool ArcosDriver::getSerialDescriptorFlags(int &flags)
   return true;
 }
 
-bool ArcosDriver::setSerialDescriptorFlags(int &flags)
+bool PioneerDriver::setSerialDescriptorFlags(int &flags)
 {
   int status;
   status = fcntl(file_descriptor_, F_SETFL, flags);
@@ -254,7 +254,7 @@ bool ArcosDriver::setSerialDescriptorFlags(int &flags)
   }
 }
 
-bool ArcosDriver::getStatusFlags(int &flags)
+bool PioneerDriver::getStatusFlags(int &flags)
 {
   // Get the flags
   flags = fcntl(file_descriptor_, F_GETFD);
@@ -266,7 +266,7 @@ bool ArcosDriver::getStatusFlags(int &flags)
   return true;
 }
 
-bool ArcosDriver::setStatusFlags(const int &flags)
+bool PioneerDriver::setStatusFlags(const int &flags)
 {
   int status;
   status = fcntl(file_descriptor_, F_SETFD, flags);
@@ -278,13 +278,13 @@ bool ArcosDriver::setStatusFlags(const int &flags)
   return true;
 }
 
-void ArcosDriver::setSerialSpeed(termios &settings, int baudrate)
+void PioneerDriver::setSerialSpeed(termios &settings, int baudrate)
 {
   cfsetispeed(&settings, baudrate);
   cfsetospeed(&settings, baudrate);
 }
 
-bool ArcosDriver::synchronize(ArcosPacket &packet)
+bool PioneerDriver::synchronize(PioneerPacket &packet)
 {
   int flags;
   this->getSerialDescriptorFlags(flags);
@@ -344,7 +344,7 @@ bool ArcosDriver::synchronize(ArcosPacket &packet)
   return true;
 }
 
-void ArcosDriver::parseSynchronizationPacket(const ArcosPacket &packet)
+void PioneerDriver::parseSynchronizationPacket(const PioneerPacket &packet)
 {
   int index = 2;
   index = packet.getStringAt(index, name_);
@@ -352,10 +352,10 @@ void ArcosDriver::parseSynchronizationPacket(const ArcosPacket &packet)
   index = packet.getStringAt(index, subtype_);
 }
 
-void ArcosDriver::closeConnection()
+void PioneerDriver::closeConnection()
 {
   ROS_INFO("Closing connection");
-  ArcosPacket packet;
+  PioneerPacket packet;
   // Send STOP
   packet.command(STOP);
   packet.send(file_descriptor_);
@@ -369,26 +369,25 @@ void ArcosDriver::closeConnection()
   file_descriptor_ = -1;
 }
 
-void ArcosDriver::sendOpen()
+void PioneerDriver::sendOpen()
 {
-  ArcosPacket packet;
+  PioneerPacket packet;
   packet.command(OPEN);
   packet.send(file_descriptor_);
 }
 
-void ArcosDriver::sendEnable(bool value)
+void PioneerDriver::sendEnable(bool value)
 {
-  ArcosPacket packet;
+  PioneerPacket packet;
   packet.command(ENABLE, static_cast<int>(value));
   packet.send(file_descriptor_);
 }
 
-void ArcosDriver::sendPulse()
+void PioneerDriver::sendPulse()
 {
-  ArcosPacket packet;
+  PioneerPacket packet;
   packet.command(PULSE);
   packet.send(file_descriptor_);
 }
 
 }
-

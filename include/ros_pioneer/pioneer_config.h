@@ -1,5 +1,5 @@
 /*********************************************************************
-* arcos_sip.h
+* pioneer_config.h
 *
 * Software License Agreement (BSD License)
 *
@@ -36,45 +36,49 @@
 * Authors: Aris Synodinos
 *********************************************************************/
 
-#ifndef ARCOS_SIP_H
-#define ARCOS_SIP_H
+#ifndef PIONEER_CONFIG_H
+#define PIONEER_CONFIG_H
 
-#include <ros_arcos/arcos_config.h>
-#include <ros_arcos/arcos_commands.h>
-#include <ros_arcos/arcos_packet.h>
-#include <nav_msgs/Odometry.h>
+#include <ros/ros.h>
+#include <string>
+#include <fstream>
+#include <map>
+#include <boost/any.hpp>
+#include <boost/algorithm/string.hpp>
 
-namespace ros_arcos{
+namespace ros_pioneer {
 
-class ArcosSIP
+class PioneerConfig
 {
 public:
-  ArcosSIP(const ArcosConfig &config);
+  bool loadFile(const std::string &filename);
+  bool getBool(const std::string &key) const;
+  void setBool(const std::string &key, bool value);
+  int getInt(const std::string &key) const;
+  void setInt(const std::string &key, int value);
+  double getDouble(const std::string &key) const;
+  void setDouble(const std::string &key, double value);
+  std::string getString(const std::string &key) const;
+  void setString(const std::string &key, const std::string &value);
+  std::vector<int> getIntVector(const std::string &key) const;
+  void setIntVector(const std::string &key, const std::vector<int> &value);
 private:
-  // Direct Methods
-  void identify(const ArcosPacket &packet) const;
-  void parseStandard(const ArcosPacket &packet) const;
-  void parseConfig(const ArcosPacket &packet) const;
-  void parseSERAUX(const ArcosPacket &packet) const;
-  void parseEncoder(const ArcosPacket &packet) const;
-  void parseTCM2(const ArcosPacket &packet) const;
-  void parseIO(const ArcosPacket &packet) const;
-  void parseIMU(const ArcosPacket &packet) const;
-  void parseJoystick(const ArcosPacket &packet) const;
-  void parseGripper(const ArcosPacket &packet) const;
-  void parseGyro(const ArcosPacket &packet) const;
-  void parseArmInfo(const ArcosPacket &packet) const;
-  void parseArm(const ArcosPacket &packet) const;
+  void parseFile(std::ifstream &file);
+  void parseLine(const std::string &line);
+  std::string getSection(std::vector<std::string> strings);
+  bool isBool(const std::string &input);
+  bool toBool(const std::string &input);
+  bool isInteger(const std::string &input);
+  int toInteger(const std::string &input);
+  bool isDouble(const std::string &input);
+  double toDouble(const std::string &input);
+  std::vector<int> toVector(const std::vector<std::string> &input);
+  void addToMap(const std::string &key, const std::string &value);
+  void addToMap(const std::string &key, const std::vector<std::string> &value);
 
-  // Indirect Methods
-  static int encoderDifference(int previous, int current);
-  static double radToDegrees(double radians);
-  static double degreesToRad(double degrees);
-
-  ros::NodeHandle nh_;
-  ArcosConfig config_;
-  float arcos_version_;
+  std::map<std::string, boost::any> configuration_;
 };
 
 }
-#endif // ARCOS_SIP_H
+
+#endif // PIONEER_CONFIG_H

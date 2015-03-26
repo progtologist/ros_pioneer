@@ -1,5 +1,5 @@
 /*********************************************************************
-* arcos_config.cpp
+* pioneer_config.cpp
 *
 * Software License Agreement (BSD License)
 *
@@ -36,12 +36,12 @@
 * Authors: Aris Synodinos
 *********************************************************************/
 
-#include <ros_arcos/arcos_config.h>
+#include <ros_pioneer/pioneer_config.h>
 #include <boost/exception/diagnostic_information.hpp>
 
-namespace ros_arcos{
+namespace ros_pioneer {
 
-bool ArcosConfig::loadFile(const std::string &filename)
+bool PioneerConfig::loadFile(const std::string &filename)
 {
   std::ifstream file;
   try{
@@ -54,14 +54,14 @@ bool ArcosConfig::loadFile(const std::string &filename)
   file.close();
 }
 
-void ArcosConfig::parseFile(std::ifstream &file)
+void PioneerConfig::parseFile(std::ifstream &file)
 {
   std::string line;
   while (std::getline(file, line))
     this->parseLine(line);
 }
 
-void ArcosConfig::parseLine(const std::string &line)
+void PioneerConfig::parseLine(const std::string &line)
 {
   static std::string section;
   std::stringstream iss(line);
@@ -90,7 +90,7 @@ void ArcosConfig::parseLine(const std::string &line)
   }
 }
 
-bool ArcosConfig::isBool(const std::string &input)
+bool PioneerConfig::isBool(const std::string &input)
 {
   std::string temp_in = boost::to_lower_copy(input);
   if (temp_in.compare("true") == 0)
@@ -100,7 +100,7 @@ bool ArcosConfig::isBool(const std::string &input)
   return false;
 }
 
-bool ArcosConfig::toBool(const std::string &input)
+bool PioneerConfig::toBool(const std::string &input)
 {
   std::string temp_in = boost::to_lower_copy(input);
   std::istringstream is(temp_in);
@@ -109,7 +109,7 @@ bool ArcosConfig::toBool(const std::string &input)
   return out;
 }
 
-bool ArcosConfig::isInteger(const std::string &input)
+bool PioneerConfig::isInteger(const std::string &input)
 {
   bool decimal = false;
   bool sign = false;
@@ -124,7 +124,7 @@ bool ArcosConfig::isInteger(const std::string &input)
   return true;
 }
 
-int ArcosConfig::toInteger(const std::string &input)
+int PioneerConfig::toInteger(const std::string &input)
 {
   std::istringstream is(input);
   int out;
@@ -132,7 +132,7 @@ int ArcosConfig::toInteger(const std::string &input)
   return out;
 }
 
-bool ArcosConfig::isDouble(const std::string &input)
+bool PioneerConfig::isDouble(const std::string &input)
 {
   bool decimal = false;
   bool sign = false;
@@ -147,7 +147,7 @@ bool ArcosConfig::isDouble(const std::string &input)
   return true;
 }
 
-double ArcosConfig::toDouble(const std::string &input)
+double PioneerConfig::toDouble(const std::string &input)
 {
   std::istringstream is(input);
   double out;
@@ -155,7 +155,7 @@ double ArcosConfig::toDouble(const std::string &input)
   return out;
 }
 
-std::vector<int> ArcosConfig::toVector(const std::vector<std::string> &input)
+std::vector<int> PioneerConfig::toVector(const std::vector<std::string> &input)
 {
   std::vector<int> out;
   for (int i = 2; i < input.size(); ++i)
@@ -163,7 +163,7 @@ std::vector<int> ArcosConfig::toVector(const std::vector<std::string> &input)
   return out;
 }
 
-void ArcosConfig::addToMap(const std::string &key, const std::string &value)
+void PioneerConfig::addToMap(const std::string &key, const std::string &value)
 {
   if (isBool(value))
     configuration_[key] = toBool(value);
@@ -175,13 +175,13 @@ void ArcosConfig::addToMap(const std::string &key, const std::string &value)
     configuration_[key] = value;
 }
 
-void ArcosConfig::addToMap(const std::string &key,
+void PioneerConfig::addToMap(const std::string &key,
                            const std::vector<std::string> &value)
 {
   configuration_[key] = toVector(value);
 }
 
-std::string ArcosConfig::getSection(std::vector<std::string> strings)
+std::string PioneerConfig::getSection(std::vector<std::string> strings)
 {
   std::string section(strings[1]);
   if (strings.size() != 2) {
@@ -193,7 +193,7 @@ std::string ArcosConfig::getSection(std::vector<std::string> strings)
   return section;
 }
 
-bool ArcosConfig::getBool(const std::string &key) const
+bool PioneerConfig::getBool(const std::string &key) const
 {
   bool value;
   std::map<std::string, boost::any>::const_iterator iter;
@@ -211,12 +211,12 @@ bool ArcosConfig::getBool(const std::string &key) const
   return (value);
 }
 
-void ArcosConfig::setBool(const std::string &key, bool value)
+void PioneerConfig::setBool(const std::string &key, bool value)
 {
   configuration_[key] = value;
 }
 
-int ArcosConfig::getInt(const std::string &key) const
+int PioneerConfig::getInt(const std::string &key) const
 {
   int value;
   std::map<std::string, boost::any>::const_iterator iter;
@@ -234,12 +234,12 @@ int ArcosConfig::getInt(const std::string &key) const
   return (value);
 }
 
-void ArcosConfig::setInt(const std::string &key, int value)
+void PioneerConfig::setInt(const std::string &key, int value)
 {
   configuration_[key] = value;
 }
 
-double ArcosConfig::getDouble(const std::string &key) const
+double PioneerConfig::getDouble(const std::string &key) const
 {
   double value;
   std::map<std::string, boost::any>::const_iterator iter;
@@ -257,12 +257,12 @@ double ArcosConfig::getDouble(const std::string &key) const
   return (value);
 }
 
-void ArcosConfig::setDouble(const std::string &key, double value)
+void PioneerConfig::setDouble(const std::string &key, double value)
 {
   configuration_[key] = value;
 }
 
-std::string ArcosConfig::getString(const std::string &key) const
+std::string PioneerConfig::getString(const std::string &key) const
 {
   std::string value;
   std::map<std::string, boost::any>::const_iterator iter;
@@ -280,12 +280,12 @@ std::string ArcosConfig::getString(const std::string &key) const
   return (value);
 }
 
-void ArcosConfig::setString(const std::string &key, const std::string &value)
+void PioneerConfig::setString(const std::string &key, const std::string &value)
 {
   configuration_[key] = value;
 }
 
-std::vector<int> ArcosConfig::getIntVector(const std::string &key) const
+std::vector<int> PioneerConfig::getIntVector(const std::string &key) const
 {
   std::vector<int> value;
   std::map<std::string, boost::any>::const_iterator iter;
@@ -303,7 +303,7 @@ std::vector<int> ArcosConfig::getIntVector(const std::string &key) const
   return (value);
 }
 
-void ArcosConfig::setIntVector(const std::string &key, const std::vector<int> &value)
+void PioneerConfig::setIntVector(const std::string &key, const std::vector<int> &value)
 {
   configuration_[key] = value;
 }

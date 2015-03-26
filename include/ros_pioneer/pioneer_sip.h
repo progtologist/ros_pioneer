@@ -1,5 +1,5 @@
 /*********************************************************************
-* arcos_config.h
+* pioneer_sip.h
 *
 * Software License Agreement (BSD License)
 *
@@ -36,49 +36,45 @@
 * Authors: Aris Synodinos
 *********************************************************************/
 
-#ifndef ARCOS_CONFIG_H
-#define ARCOS_CONFIG_H
+#ifndef PIONEER_SIP_H
+#define PIONEER_SIP_H
 
-#include <ros/ros.h>
-#include <string>
-#include <fstream>
-#include <map>
-#include <boost/any.hpp>
-#include <boost/algorithm/string.hpp>
+#include <ros_pioneer/pioneer_config.h>
+#include <ros_pioneer/pioneer_commands.h>
+#include <ros_pioneer/pioneer_packet.h>
+#include <nav_msgs/Odometry.h>
 
-namespace ros_arcos{
+namespace ros_pioneer {
 
-class ArcosConfig
+class PioneerSIP
 {
 public:
-  bool loadFile(const std::string &filename);
-  bool getBool(const std::string &key) const;
-  void setBool(const std::string &key, bool value);
-  int getInt(const std::string &key) const;
-  void setInt(const std::string &key, int value);
-  double getDouble(const std::string &key) const;
-  void setDouble(const std::string &key, double value);
-  std::string getString(const std::string &key) const;
-  void setString(const std::string &key, const std::string &value);
-  std::vector<int> getIntVector(const std::string &key) const;
-  void setIntVector(const std::string &key, const std::vector<int> &value);
+  PioneerSIP(const PioneerConfig &config);
 private:
-  void parseFile(std::ifstream &file);
-  void parseLine(const std::string &line);
-  std::string getSection(std::vector<std::string> strings);
-  bool isBool(const std::string &input);
-  bool toBool(const std::string &input);
-  bool isInteger(const std::string &input);
-  int toInteger(const std::string &input);
-  bool isDouble(const std::string &input);
-  double toDouble(const std::string &input);
-  std::vector<int> toVector(const std::vector<std::string> &input);
-  void addToMap(const std::string &key, const std::string &value);
-  void addToMap(const std::string &key, const std::vector<std::string> &value);
+  // Direct Methods
+  void identify(const PioneerPacket &packet) const;
+  void parseStandard(const PioneerPacket &packet) const;
+  void parseConfig(const PioneerPacket &packet) const;
+  void parseSERAUX(const PioneerPacket &packet) const;
+  void parseEncoder(const PioneerPacket &packet) const;
+  void parseTCM2(const PioneerPacket &packet) const;
+  void parseIO(const PioneerPacket &packet) const;
+  void parseIMU(const PioneerPacket &packet) const;
+  void parseJoystick(const PioneerPacket &packet) const;
+  void parseGripper(const PioneerPacket &packet) const;
+  void parseGyro(const PioneerPacket &packet) const;
+  void parseArmInfo(const PioneerPacket &packet) const;
+  void parseArm(const PioneerPacket &packet) const;
 
-  std::map<std::string, boost::any> configuration_;
+  // Indirect Methods
+  static int encoderDifference(int previous, int current);
+  static double radToDegrees(double radians);
+  static double degreesToRad(double degrees);
+
+  ros::NodeHandle nh_;
+  PioneerConfig config_;
+  float arcos_version_;
 };
 
 }
-
-#endif // ARCOS_CONFIG_H
+#endif // PIONEER_SIP_H

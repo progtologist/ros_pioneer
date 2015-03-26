@@ -1,5 +1,5 @@
 /*********************************************************************
-* packet.cpp
+* pioneer_packet.cpp
 *
 * Software License Agreement (BSD License)
 *
@@ -36,13 +36,13 @@
 * Authors: Aris Synodinos
 *********************************************************************/
 
-#include <ros_arcos/arcos_packet.h>
+#include <ros_pioneer/pioneer_packet.h>
 #include <cassert>
 #include <fcntl.h>
 
-namespace ros_arcos{
+namespace ros_pioneer {
 
-void ArcosPacket::command(const Init_t &command)
+void PioneerPacket::command(const Init_t &command)
 {
   this->clear();
   this->setHeader();
@@ -51,7 +51,7 @@ void ArcosPacket::command(const Init_t &command)
   this->setChecksum();
 }
 
-void ArcosPacket::command(const Void_t &command)
+void PioneerPacket::command(const Void_t &command)
 {
   this->clear();
   this->setHeader();
@@ -60,7 +60,7 @@ void ArcosPacket::command(const Void_t &command)
   this->setChecksum();
 }
 
-void ArcosPacket::command(const Int_t &command, int value)
+void PioneerPacket::command(const Int_t &command, int value)
 {
   this->clear();
   this->setHeader();
@@ -72,7 +72,7 @@ void ArcosPacket::command(const Int_t &command, int value)
   this->setChecksum();
 }
 
-void ArcosPacket::command(const TwoBytes_t &command,
+void PioneerPacket::command(const TwoBytes_t &command,
                           unsigned char first_byte,
                           unsigned char second_byte)
 {
@@ -85,7 +85,7 @@ void ArcosPacket::command(const TwoBytes_t &command,
   this->setChecksum();
 }
 
-void ArcosPacket::command(const TwoBytes_t &command,
+void PioneerPacket::command(const TwoBytes_t &command,
                           const std::vector<bool> first_byte,
                           const std::vector<bool> second_byte)
 {
@@ -109,7 +109,7 @@ void ArcosPacket::command(const TwoBytes_t &command,
   this->setChecksum();
 }
 
-void ArcosPacket::command(const Str_t &command,
+void PioneerPacket::command(const Str_t &command,
                           const std::string &msg)
 {
   assert(msg.size() < 200);
@@ -122,12 +122,12 @@ void ArcosPacket::command(const Str_t &command,
   this->setChecksum();
 }
 
-void ArcosPacket::clear()
+void PioneerPacket::clear()
 {
   memset(buffer_, 0, sizeof(buffer_));
 }
 
-bool ArcosPacket::send(int file_descriptor)
+bool PioneerPacket::send(int file_descriptor)
 {
   size_t buffer_size = buffer_[2] + 3;  // Send the entire buffer,
                                         // Including the header
@@ -140,7 +140,7 @@ bool ArcosPacket::send(int file_descriptor)
   return true;
 }
 
-bool ArcosPacket::receive(int file_descriptor)
+bool PioneerPacket::receive(int file_descriptor)
 {
   unsigned char current_char = 0, previous_char = 0;
   bool header_flag = false;
@@ -176,7 +176,7 @@ bool ArcosPacket::receive(int file_descriptor)
   return true;
 }
 
-unsigned char ArcosPacket::operator [](int i) const
+unsigned char PioneerPacket::operator [](int i) const
 {
   if (i < 0 || i > 206)
     ROS_ERROR("Packet out of bounds, requested %i", i);
@@ -184,7 +184,7 @@ unsigned char ArcosPacket::operator [](int i) const
     return buffer_[i];
 }
 
-unsigned char ArcosPacket::at(int i) const
+unsigned char PioneerPacket::at(int i) const
 {
   if (i < 0 || i > buffer_[2] - 2)
     ROS_ERROR("Packet out of bounds, requested %i and size was %i", i, buffer_[2]-2);
@@ -192,7 +192,7 @@ unsigned char ArcosPacket::at(int i) const
     return buffer_[i+2];
 }
 
-int ArcosPacket::getIntegerAt(int i, int &output) const
+int PioneerPacket::getIntegerAt(int i, int &output) const
 {
   /* 15 ls-bits and 1 bit sign */
   if (i < 0 || i > buffer_[2] - 2)
@@ -207,7 +207,7 @@ int ArcosPacket::getIntegerAt(int i, int &output) const
   }
 }
 
-int ArcosPacket::getUnsignedAt(int i, int &output) const
+int PioneerPacket::getUnsignedAt(int i, int &output) const
 {
   /* 16 ls-bits */
   if (i < 0 || i > buffer_[2] - 2)
@@ -219,7 +219,7 @@ int ArcosPacket::getUnsignedAt(int i, int &output) const
   }
 }
 
-int ArcosPacket::getStringAt(int i, std::string &output) const
+int PioneerPacket::getStringAt(int i, std::string &output) const
 {
   if (i < 0 || i > buffer_[2] - 2)
     ROS_ERROR("Packet out of bounds, requested %i and size was %i", i, buffer_[2]-2);
@@ -236,7 +236,7 @@ int ArcosPacket::getStringAt(int i, std::string &output) const
   }
 }
 
-int ArcosPacket::getStringAt(int i, int length, std::string &output) const
+int PioneerPacket::getStringAt(int i, int length, std::string &output) const
 {
   if (i < 0 || i > buffer_[2] - 2 || length > buffer_[2] - 2)
     ROS_ERROR("Packet out of bounds, requested %i, length was %i, size was %i,", i, length, buffer_[2]-2);
@@ -249,7 +249,7 @@ int ArcosPacket::getStringAt(int i, int length, std::string &output) const
   }
 }
 
-int ArcosPacket::getBoolVectorAt(int i, std::vector<bool> &output) const
+int PioneerPacket::getBoolVectorAt(int i, std::vector<bool> &output) const
 {
   if (i < 0 || i > buffer_[2] - 2)
     ROS_ERROR("Packet out of bounds, requested %i and size was %i", i, buffer_[2]-2);
@@ -263,7 +263,7 @@ int ArcosPacket::getBoolVectorAt(int i, std::vector<bool> &output) const
   }
 }
 
-bool ArcosPacket::check()
+bool PioneerPacket::check()
 {
   int checksum = this->calculateChecksum();
   size_t buffer_size = buffer_[2] - 2;
@@ -272,7 +272,7 @@ bool ArcosPacket::check()
   return false;
 }
 
-int ArcosPacket::calculateChecksum()
+int PioneerPacket::calculateChecksum()
 {
   int checksum = 0;
   size_t bytes_left = buffer_[2] - 2;
@@ -291,7 +291,7 @@ int ArcosPacket::calculateChecksum()
   return (checksum);
 }
 
-void ArcosPacket::printHex()
+void PioneerPacket::printHex()
 {
   size_t buffer_size = buffer_[2] + 3;  // Print the entire buffer,
                                         // Including the header
@@ -302,7 +302,7 @@ void ArcosPacket::printHex()
   }
 }
 
-void ArcosPacket::printDec()
+void PioneerPacket::printDec()
 {
   size_t buffer_size = buffer_[2] + 3;  // Print the entire buffer,
                                         // Including the header
@@ -313,7 +313,7 @@ void ArcosPacket::printDec()
   }
 }
 
-void ArcosPacket::printASCII()
+void PioneerPacket::printASCII()
 {
   size_t buffer_size = buffer_[2] + 3;  // Print the entire buffer,
                                         // Including the header
@@ -324,42 +324,42 @@ void ArcosPacket::printASCII()
   }
 }
 
-void ArcosPacket::setHeader()
+void PioneerPacket::setHeader()
 {
   buffer_[0] = 0xFA;
   buffer_[1] = 0xFB;
 }
 
-void ArcosPacket::setSize(unsigned char size)
+void PioneerPacket::setSize(unsigned char size)
 {
   buffer_[2] = size;
 }
 
-void ArcosPacket::setCommand(unsigned char command)
+void PioneerPacket::setCommand(unsigned char command)
 {
   buffer_[3] = command;
 }
 
-void ArcosPacket::setType(const Types_t &type)
+void PioneerPacket::setType(const Types_t &type)
 {
   buffer_[4] = static_cast<unsigned char>(type);
 }
 
-void ArcosPacket::setArgument(int value)
+void PioneerPacket::setArgument(int value)
 {
   unsigned short argument = static_cast<unsigned short>(std::abs(value));
   buffer_[5] = argument & 0xFF;
   buffer_[6] = (argument >> 8) & 0xFF;
 }
 
-void ArcosPacket::setArgument(unsigned char first_byte,
+void PioneerPacket::setArgument(unsigned char first_byte,
                               unsigned char second_byte)
 {
   buffer_[5] = first_byte;
   buffer_[6] = second_byte;
 }
 
-void ArcosPacket::setArgument(const std::string &argument)
+void PioneerPacket::setArgument(const std::string &argument)
 {
   buffer_[5] = argument.size();
   for (size_t i = 0; i < argument.size(); ++i)
@@ -368,7 +368,7 @@ void ArcosPacket::setArgument(const std::string &argument)
   }
 }
 
-void ArcosPacket::setChecksum()
+void PioneerPacket::setChecksum()
 {
   size_t buffer_size = buffer_[2];
   int checksum = this->calculateChecksum();
@@ -376,12 +376,12 @@ void ArcosPacket::setChecksum()
   buffer_[buffer_size+2] = checksum & 0xFF;
 }
 
-bool ArcosPacket::getBit(unsigned char byte, int position) const
+bool PioneerPacket::getBit(unsigned char byte, int position) const
 {
   return (byte >> position) & 0x01;
 }
 
-void ArcosPacket::setBit(bool bit, int position, unsigned char &output) const
+void PioneerPacket::setBit(bool bit, int position, unsigned char &output) const
 {
   output |= (bit << position);
 }

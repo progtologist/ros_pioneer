@@ -37,15 +37,15 @@
 *********************************************************************/
 
 #include <gtest/gtest.h>
-#include <ros_arcos/arcos_driver.h>
+#include <ros_pioneer/pioneer_driver.h>
 
-using namespace ros_arcos;
+using namespace ros_pioneer;
 using namespace std;
 
-TEST(ArcosDriver, Constructor)
+TEST(PioneerDriver, Constructor)
 {
   ros::Time::init();
-  ArcosDriver driver;
+  PioneerDriver driver;
 }
 
 int main(int argc, char **argv)

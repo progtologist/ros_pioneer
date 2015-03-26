@@ -1,5 +1,5 @@
 /*********************************************************************
-* arcos_packet.h
+* pioneer_packet.h
 *
 * Software License Agreement (BSD License)
 *
@@ -37,18 +37,18 @@
 *********************************************************************/
 
 
-#ifndef ARCOS_PACKET_H
-#define ARCOS_PACKET_H
+#ifndef PIONEER_PACKET_H
+#define PIONEER_PACKET_H
 
 #include <ros/ros.h>
 #include <string>
-#include <ros_arcos/arcos_commands.h>
+#include <ros_pioneer/pioneer_commands.h>
 
-namespace ros_arcos{
+namespace ros_pioneer {
 /**
- * @brief The ArcosPacket class
+ * @brief The PioneerPacket class
  */
-class ArcosPacket
+class PioneerPacket
 {
 public:
   /**
@@ -194,4 +194,4 @@ protected:
 
 }
 
-#endif // ARCOS_PACKET_H
+#endif // PIONEER_PACKET_H

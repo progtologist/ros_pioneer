@@ -1,5 +1,5 @@
 /*********************************************************************
-* arcos_sip.cpp
+* pioneer_sip.cpp
 *
 * Software License Agreement (BSD License)
 *
@@ -36,16 +36,16 @@
 * Authors: Aris Synodinos
 *********************************************************************/
 
-#include <ros_arcos/arcos_sip.h>
+#include <ros_pioneer/pioneer_sip.h>
 #include <boost/math/constants/constants.hpp>
 #include <limits>
 #include <cmath>
 
 using nav_msgs::Odometry;
 
-namespace ros_arcos{
+namespace ros_pioneer {
 
-ArcosSIP::ArcosSIP(const ArcosConfig &config) :
+PioneerSIP::PioneerSIP(const PioneerConfig &config) :
   nh_("~"),
   arcos_version_(1.0),
   config_(config)
@@ -53,7 +53,7 @@ ArcosSIP::ArcosSIP(const ArcosConfig &config) :
 
 }
 
-void ArcosSIP::identify(const ArcosPacket &packet) const
+void PioneerSIP::identify(const PioneerPacket &packet) const
 {
   if (packet.at(1) >= STANDARDmpac && packet.at(1) <= STANDARDMpac)
     parseStandard(packet);
@@ -102,7 +102,7 @@ void ArcosSIP::identify(const ArcosPacket &packet) const
   }
 }
 
-void ArcosSIP::parseStandard(const ArcosPacket& packet) const
+void PioneerSIP::parseStandard(const PioneerPacket & packet) const
 {
   typedef std::pair<unsigned char, int> sonar_t;
   static int total_x    = 0;
@@ -186,7 +186,7 @@ void ArcosSIP::parseStandard(const ArcosPacket& packet) const
 
 }
 
-void ArcosSIP::parseConfig(const ArcosPacket& packet) const
+void PioneerSIP::parseConfig(const PioneerPacket & packet) const
 {
   int index = 2;
   std::string robot_type;
@@ -285,7 +285,7 @@ void ArcosSIP::parseConfig(const ArcosPacket& packet) const
   }
 }
 
-void ArcosSIP::parseSERAUX(const ArcosPacket& packet) const
+void PioneerSIP::parseSERAUX(const PioneerPacket & packet) const
 {
   int size = static_cast<int>(packet.at(0)) - 2;
   std::string serial_message;
@@ -294,52 +294,52 @@ void ArcosSIP::parseSERAUX(const ArcosPacket& packet) const
   index = packet.getStringAt(index, size, serial_message);
 }
 
-void ArcosSIP::parseEncoder(const ArcosPacket& packet) const
+void PioneerSIP::parseEncoder(const PioneerPacket & packet) const
 {
 
 }
 
-void ArcosSIP::parseTCM2(const ArcosPacket& packet) const
+void PioneerSIP::parseTCM2(const PioneerPacket & packet) const
 {
 
 }
 
-void ArcosSIP::parseIO(const ArcosPacket& packet) const
+void PioneerSIP::parseIO(const PioneerPacket & packet) const
 {
 
 }
 
-void ArcosSIP::parseIMU(const ArcosPacket& packet) const
+void PioneerSIP::parseIMU(const PioneerPacket & packet) const
 {
 
 }
 
-void ArcosSIP::parseJoystick(const ArcosPacket& packet) const
+void PioneerSIP::parseJoystick(const PioneerPacket & packet) const
 {
 
 }
 
-void ArcosSIP::parseGripper(const ArcosPacket& packet) const
+void PioneerSIP::parseGripper(const PioneerPacket & packet) const
 {
 
 }
 
-void ArcosSIP::parseGyro(const ArcosPacket& packet) const
+void PioneerSIP::parseGyro(const PioneerPacket & packet) const
 {
 
 }
 
-void ArcosSIP::parseArmInfo(const ArcosPacket& packet) const
+void PioneerSIP::parseArmInfo(const PioneerPacket & packet) const
 {
 
 }
 
-void ArcosSIP::parseArm(const ArcosPacket& packet) const
+void PioneerSIP::parseArm(const PioneerPacket & packet) const
 {
 
 }
 
-int ArcosSIP::encoderDifference(int previous, int current)
+int PioneerSIP::encoderDifference(int previous, int current)
 {
   int diff = std::abs(current - previous);
   int compl_diff = 4096 - diff;
@@ -349,13 +349,13 @@ int ArcosSIP::encoderDifference(int previous, int current)
     return (diff < compl_diff ? -diff : -compl_diff);
 }
 
-double ArcosSIP::radToDegrees(double radians)
+double PioneerSIP::radToDegrees(double radians)
 {
   static const double PI = boost::math::constants::pi<double>();
   return (radians * 180.0 / PI);
 }
 
-double ArcosSIP::degreesToRad(double degrees)
+double PioneerSIP::degreesToRad(double degrees)
 {
   static const double PI = boost::math::constants::pi<double>();
   return (degrees * PI / 180.0);

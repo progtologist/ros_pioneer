@@ -1,5 +1,5 @@
 /*********************************************************************
-* arcos_driver.h
+* pioneer_driver.h
 *
 * Software License Agreement (BSD License)
 *
@@ -36,22 +36,22 @@
 * Authors: Aris Synodinos
 *********************************************************************/
 
-#ifndef ARCOS_DRIVER_H
-#define ARCOS_DRIVER_H
+#ifndef PIONEER_DRIVER_H
+#define PIONEER_DRIVER_H
 
-#include <ros_arcos/arcos_packet.h>
-#include <ros_arcos/arcos_config.h>
+#include "pioneer_packet.h"
+#include "pioneer_config.h"
 #include <ros/ros.h>
 #include <deque>
 #include <termios.h>
 
-namespace ros_arcos{
+namespace ros_pioneer {
 
-class ArcosDriver
+class PioneerDriver
 {
 public:
-  ArcosDriver();
-  ~ArcosDriver();
+  PioneerDriver();
+  ~PioneerDriver();
 private:
   bool initSerial(const std::string &serial_port);
   bool initTCP(const std::string &hostname,
@@ -65,17 +65,17 @@ private:
   bool getStatusFlags(int &flags);
   bool setStatusFlags(const int &flags);
   void setSerialSpeed(termios &settings, int baudrate);
-  bool synchronize(ArcosPacket &packet);
-  void parseSynchronizationPacket(const ArcosPacket &packet);
+  bool synchronize(PioneerPacket &packet);
+  void parseSynchronizationPacket(const PioneerPacket &packet);
   void closeConnection();
 
-  // Arcos Commands
+  // Pioneer Commands
   void sendOpen();
   void sendEnable(bool value);
   void sendPulse();
 
-  std::deque<ArcosPacket> outgoing_packets_;
-  ArcosConfig config_;
+  std::deque<PioneerPacket> outgoing_packets_;
+  PioneerConfig config_;
   int file_descriptor_;
   std::string name_;
   std::string type_;
@@ -84,4 +84,4 @@ private:
 
 }
 
-#endif // ARCOS_DRIVER_H
+#endif // PIONEER_DRIVER_H

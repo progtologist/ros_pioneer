@@ -37,15 +37,15 @@
 *********************************************************************/
 
 #include <gtest/gtest.h>
-#include <ros_arcos/arcos_packet.h>
+#include <ros_pioneer/pioneer_packet.h>
 
-using namespace ros_arcos;
+using namespace ros_pioneer;
 using namespace std;
 
-TEST(ArcosPacket, Init_Commands)
+TEST(PioneerPacket, Init_Commands)
 {
   {
-    ArcosPacket pac;
+    PioneerPacket pac;
     pac.command(SYNC0);
     EXPECT_EQ(pac[0],250);
     EXPECT_EQ(pac[1],251);
@@ -56,7 +56,7 @@ TEST(ArcosPacket, Init_Commands)
   }
 
   {
-    ArcosPacket pac;
+    PioneerPacket pac;
     pac.command(SYNC1);
     EXPECT_EQ(pac[0],250);
     EXPECT_EQ(pac[1],251);
@@ -67,7 +67,7 @@ TEST(ArcosPacket, Init_Commands)
   }
 
   {
-    ArcosPacket pac;
+    PioneerPacket pac;
     pac.command(SYNC2);
     EXPECT_EQ(pac[0],250);
     EXPECT_EQ(pac[1],251);
@@ -78,9 +78,9 @@ TEST(ArcosPacket, Init_Commands)
   }
 }
 
-TEST(ArcosPacket, Void_Commands)
+TEST(PioneerPacket, Void_Commands)
 {
-  ArcosPacket pac;
+  PioneerPacket pac;
   pac.command(PULSE);
 
   EXPECT_EQ(pac[0],0xFA);
@@ -91,9 +91,9 @@ TEST(ArcosPacket, Void_Commands)
   EXPECT_EQ(pac[5],0x00);
 }
 
-TEST(ArcosPacket, Int_Commands)
+TEST(PioneerPacket, Int_Commands)
 {
-  ArcosPacket pac;
+  PioneerPacket pac;
   pac.command(HOSTBAUD, 3);
   EXPECT_EQ(pac[0],0xFA);
   EXPECT_EQ(pac[1],0xFB);
@@ -106,9 +106,9 @@ TEST(ArcosPacket, Int_Commands)
   EXPECT_EQ(pac[8],0x3B);
 }
 
-TEST(ArcosPacket, TwoBytes_Char_Commands)
+TEST(PioneerPacket, TwoBytes_Char_Commands)
 {
-  ArcosPacket pac;
+  PioneerPacket pac;
   pac.command(ARM_POS, 25, 3);
   EXPECT_EQ(pac[0],0xFA);
   EXPECT_EQ(pac[1],0xFB);
@@ -121,9 +121,9 @@ TEST(ArcosPacket, TwoBytes_Char_Commands)
   EXPECT_EQ(pac[8],0x3E);
 }
 
-TEST(ArcosPacket, TwoBytes_Vector_Commands)
+TEST(PioneerPacket, TwoBytes_Vector_Commands)
 {
-  ArcosPacket pac;
+  PioneerPacket pac;
   std::vector<bool> f_byte(8,0);
   f_byte[0] = 1;
   f_byte[2] = 1;
@@ -142,9 +142,9 @@ TEST(ArcosPacket, TwoBytes_Vector_Commands)
   EXPECT_EQ(pac[8],0x45);
 }
 
-TEST(ArcosPacket, String_Commands)
+TEST(PioneerPacket, String_Commands)
 {
-  ArcosPacket pac;
+  PioneerPacket pac;
   pac.command(TTY2, "TEST");
   EXPECT_EQ(pac[0],0xFA);
   EXPECT_EQ(pac[1],0xFB);
@@ -160,17 +160,17 @@ TEST(ArcosPacket, String_Commands)
   EXPECT_EQ(pac[11],0x86);
 }
 
-TEST(ArcosPacket, At_Accessor)
+TEST(PioneerPacket, At_Accessor)
 {
-  ArcosPacket pac;
+  PioneerPacket pac;
   pac.command(PULSE);
   EXPECT_EQ(pac.at(0),0x03);
   EXPECT_EQ(pac.at(1),0x00);
 }
 
-TEST(ArcosPacket, Get_Unsigned_Integer_At_Accessor)
+TEST(PioneerPacket, Get_Unsigned_Integer_At_Accessor)
 {
-  ArcosPacket pac;
+  PioneerPacket pac;
   pac.command(HOSTBAUD, 40000);     // Value larger than 32767
   EXPECT_EQ(pac.at(0), 6);          // Size of packet
   EXPECT_EQ(pac.at(1), HOSTBAUD);   // The command
@@ -181,9 +181,9 @@ TEST(ArcosPacket, Get_Unsigned_Integer_At_Accessor)
   EXPECT_EQ(index, 5);              // The index of the next values
 }
 
-TEST(ArcosPacket, Get_Integer_At_Accessor)
+TEST(PioneerPacket, Get_Integer_At_Accessor)
 {
-  ArcosPacket pac;
+  PioneerPacket pac;
   pac.command(HOSTBAUD, 300);
   EXPECT_EQ(pac.at(0), 6);          // Size of packet
   EXPECT_EQ(pac.at(1), HOSTBAUD);   // The command
@@ -194,9 +194,9 @@ TEST(ArcosPacket, Get_Integer_At_Accessor)
   EXPECT_EQ(index, 5);              // The index of the next values
 }
 
-TEST(ArcosPacket, Get_String_At_Length_Accessor)
+TEST(PioneerPacket, Get_String_At_Length_Accessor)
 {
-  ArcosPacket pac;
+  PioneerPacket pac;
   pac.command(TTY2, "TEST");
   EXPECT_EQ(pac.at(0), 9);                            // Size of packet
   EXPECT_EQ(pac.at(1), TTY2);                    // The command
@@ -209,9 +209,9 @@ TEST(ArcosPacket, Get_String_At_Length_Accessor)
   EXPECT_EQ(index, 9);
 }
 
-TEST(ArcosPacket, Get_String_At_Accessor)
+TEST(PioneerPacket, Get_String_At_Accessor)
 {
-  ArcosPacket pac;
+  PioneerPacket pac;
   pac.command(TTY2, "NULL TERMINATED");
   EXPECT_EQ(pac.at(0), 20);
   EXPECT_EQ(pac.at(1), TTY2);
@@ -224,9 +224,9 @@ TEST(ArcosPacket, Get_String_At_Accessor)
   EXPECT_EQ(index, 20);
 }
 
-TEST(ArcosPacket, Get_Bool_Vector_At_Accessor)
+TEST(PioneerPacket, Get_Bool_Vector_At_Accessor)
 {
-  ArcosPacket pac;
+  PioneerPacket pac;
   pac.command(ENABLE, 21); // Just for testing
   std::vector<bool> value;
   int index;

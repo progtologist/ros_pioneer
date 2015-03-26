@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ros_arcos)
+project(ros_pioneer)
 
 find_package(catkin REQUIRED
              COMPONENTS roscpp roslib tf geometry_msgs nav_msgs)
@@ -7,7 +7,7 @@ find_package(Boost REQUIRED COMPONENTS thread)
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES ros_arcos
+  LIBRARIES ros_pioneer
 )
 
 set(PACKAGE_PATH "${PROJECT_SOURCE_DIR}")

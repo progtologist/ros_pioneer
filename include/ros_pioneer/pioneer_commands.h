@@ -1,5 +1,5 @@
 /*********************************************************************
-* arcos_commands.h
+* pioneer_commands.h
 *
 * Software License Agreement (BSD License)
 *
@@ -36,10 +36,10 @@
 * Authors: Aris Synodinos
 *********************************************************************/
 
-#ifndef ARCOS_COMMANDS_H
-#define ARCOS_COMMANDS_H
+#ifndef PIONEER_COMMANDS_H
+#define PIONEER_COMMANDS_H
 
-namespace ros_arcos{
+namespace ros_pioneer {
 
 typedef enum
 {
@@ -265,4 +265,4 @@ typedef enum{
 
 }
 
-#endif // ARCOS_COMMANDS_H
+#endif // PIONEER_COMMANDS_H

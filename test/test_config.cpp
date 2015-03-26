@@ -37,19 +37,19 @@
 *********************************************************************/
 
 #include <gtest/gtest.h>
-#include <ros_arcos/arcos_config.h>
-#include <ros_arcos/config.h>
+#include <ros_pioneer/pioneer_config.h>
+#include <ros_pioneer/config.h>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/exception_ptr.hpp>
 
-using namespace ros_arcos;
+using namespace ros_pioneer;
 using namespace std;
 using boost::any;
 using boost::any_cast;
 
-TEST(ArcosConfig, FileParser)
+TEST(PioneerConfig, FileParser)
 {
-  ArcosConfig con;
+  PioneerConfig con;
   string package_path(PACKAGE_PATH);
   string open_path(package_path);
   open_path.append("/config/params/p3dx.p");
@@ -67,9 +67,9 @@ TEST(ArcosConfig, FileParser)
   EXPECT_EQ(sonar_0[0], 69);
 }
 
-TEST(ArcosConfig, Setters)
+TEST(PioneerConfig, Setters)
 {
-  ArcosConfig con;
+  PioneerConfig con;
   con.setBool("First Test", true);
   EXPECT_EQ(con.getBool("First Test"), true);
   con.setInt("Second Test", 22);
