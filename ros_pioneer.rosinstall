@@ -1,0 +1,1 @@
+- git: {local-name: ros_pioneer, uri: 'https://github.com/progtologist/ros_pioneer.git', version: master}
