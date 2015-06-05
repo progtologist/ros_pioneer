@@ -12,6 +12,8 @@ catkin_package(
 )
 
 set(PACKAGE_PATH "${PROJECT_SOURCE_DIR}")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
+
 configure_file(${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/config.h.in
                ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/config.h)
 
@@ -27,10 +29,10 @@ option(BUILD_DOCS "Use Doxygen to create the HTML based API documentation" OFF)
 if(BUILD_DOCS)
     find_package(Doxygen)
     if(DOXYGEN_FOUND)
-        configure_file(${PROJECT_SOURCE_DIR}/doc/Doxyfile.in ${PROJECT_BINARY_DIR}/doc/doxygen/Doxyfile @ONLY)
-        add_custom_target(docs 
-                          COMMAND ${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/doc/doxygen/Doxyfile
-                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/doc/doxygen/
+        configure_file(${PROJECT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_BINARY_DIR}/doc/doxygen/Doxyfile @ONLY)
+        add_custom_target(docs ALL
+                          COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/doc/doxygen/Doxyfile
+                          WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/doc/doxygen/
                           COMMENT "Generating API documentation with Doxygen" VERBATIM
         )
     endif(DOXYGEN_FOUND)
@@ -48,7 +50,7 @@ if(BUILD_SPHINX)
     # Copy the configured files for READTHEDOCS
     configure_file("${PROJECT_SOURCE_DIR}/doc/conf.py.in" "${PROJECT_SOURCE_DIR}/doc/conf.py" @ONLY)
     configure_file("${PROJECT_SOURCE_DIR}/doc/index.rst.in" "${PROJECT_SOURCE_DIR}/doc/index.rst" @ONLY)
-    add_custom_target(sphinx 
+    add_custom_target(sphinx ALL
                       COMMAND ${SPHINX_EXECUTABLE}
                       -q -b html
                       -c "${BINARY_BUILD_DIR}"
@@ -74,7 +76,7 @@ if(BUILD_TESTS OR ENABLE_COVERAGE)
         catkin_add_gtest(${filename} ${ITEM})
         target_link_libraries(${filename} ${PROJECT_NAME})
     endforeach()
-endif(BUILD_TESTS)
+endif(BUILD_TESTS OR ENABLE_COVERAGE)
 ##############
 ## Coverage ##
 ##############
