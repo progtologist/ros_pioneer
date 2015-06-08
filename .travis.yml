@@ -20,7 +20,7 @@ before_install: # Use this to prepare the system to install prerequisites or dep
   - export REPOSITORY_NAME=${PWD##*/}
   - echo "Testing branch $TRAVIS_BRANCH of $REPOSITORY_NAME"
   - sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu precise main" > /etc/apt/sources.list.d/ros-latest.list'
-  - wget http://packages.ros.org/ros.key -O - | sudo apt-key add 
+  - wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
   - wget http://robots.mobilerobots.com/MobileSim/download/current/mobilesim_0.7.3+ubuntu12+gcc4.6_amd64.deb
   - sudo dpkg -i mobilesim_*
   - sudo apt-get update -qq
