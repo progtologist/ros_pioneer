@@ -32,13 +32,13 @@ before_install: # Use this to prepare the system to install prerequisites or dep
   - gem install coveralls-lcov
 install: # Use this to install any prerequisites or dependencies necessary to run your build
   # Create workspace
-  - mkdir -p ~/ros/ws_ros_pioneer/src
-  - cd ~/ros/ws_ros_pioneer/src
+  - mkdir -p ~/ros/ws_$REPOSITORY_NAME/src
+  - cd ~/ros/ws_$REPOSITORY_NAME/src
   - wstool init .
   # Download non-debian stuff
-  - wstool merge https://raw.githubusercontent.com/progtologist/ros_pioneer/master/ros_pioneer.rosinstall
+  - wstool merge https://raw.githubusercontent.com/progtologist/$REPOSITORY_NAME/$TRAVIS_BRANCH/$REPOSITORY_NAME.rosinstall
   - wstool update
-  # Delete the ros_pioneer.rosinstall version of this repo and use the one of the branch we are testing
+  # Delete the $REPOSITORY_NAME.rosinstall version of this repo and use the one of the branch we are testing
   - rm -rf $REPOSITORY_NAME
   - ln -s $CI_SOURCE_PATH . # Link the repo we are testing to the new workspace
   - cd ../
@@ -54,7 +54,7 @@ after_success:
   - catkin_make run_tests
   - lcov --path . --directory . --capture --output-file coverage.info
   - lcov --remove coverage.info 'tests/*' '/usr/*' '/opt/*' --output-file coverage.info
-  - sed 's|/tmp/ws/src/package/||g' < coverage.info > /tmp/ws/src/package/coverage.info
-  - cd /tmp/ws/src/package
+  - sed 's|src/$REPOSITORY_NAME/||g' < coverage.info > src/$REPOSITORY_NAME/coverage.info
+  - cd src/$REPOSITORY_NAME
   - lcov --list coverage.info
   - coveralls-lcov coverage.info
