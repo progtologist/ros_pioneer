@@ -25,10 +25,11 @@ before_install: # Use this to prepare the system to install prerequisites or dep
   - wget http://robots.mobilerobots.com/MobileSim/download/current/mobilesim_0.7.3+ubuntu12+gcc4.6_amd64.deb
   - sudo gdebi --non-interactive mobilesim_*
   - sudo apt-get update -qq
-  - sudo apt-get install -qq -y python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-catkin ros-$ROS_DISTRO-ros
+  - sudo apt-get install -qq -y python-catkin-pkg python-rosdep python-wstool ros-$ROS_DISTRO-catkin ros-$ROS_DISTRO-ros lcov
   # Setup rosdep
   - sudo rosdep init
   - rosdep update
+  - gem install coveralls-lcov
 install: # Use this to install any prerequisites or dependencies necessary to run your build
   # Create workspace
   - mkdir -p ~/ros/ws_ros_pioneer/src
@@ -48,3 +49,12 @@ before_script: # Use this to prepare your build for testing e.g. copy database c
 script: # All commands must exit with code 0 on success. Anything else is considered failure.
   - catkin_make -j2
   - catkin_make run_tests
+after_success:
+  - catkin_make -DCOVERAGE=ON
+  - catkin_make run_tests
+  - lcov --path . --directory . --capture --output-file coverage.info
+  - lcov --remove coverage.info 'tests/*' '/usr/*' '/opt/*' --output-file coverage.info
+  - sed 's|/tmp/ws/src/package/||g' < coverage.info > /tmp/ws/src/package/coverage.info
+  - cd /tmp/ws/src/package
+  - lcov --list coverage.info
+  - coveralls-lcov coverage.info

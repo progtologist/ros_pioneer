@@ -12,7 +12,6 @@ catkin_package(
 )
 
 set(PACKAGE_PATH "${PROJECT_SOURCE_DIR}")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
 
 configure_file(${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/config.h.in
                ${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME}/config.h)
@@ -21,6 +20,17 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 
 file(GLOB_RECURSE HEADERS include/${PROJECT_NAME}/*.h)
 file(GLOB_RECURSE SOURCES src/*.cpp)
+
+##############
+## Coverage ##
+##############
+set(COVERAGE "OFF" CACHE STRING "Enable coverage generation.")
+
+message(STATUS "Using COVERAGE: ${COVERAGE}")
+if("${COVERAGE}" STREQUAL "ON")
+    set(CMAKE_BUILD_TYPE "Debug")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage -fprofile-arcs -ftest-coverage")
+endif()
 
 ##############
 ## Building ##
