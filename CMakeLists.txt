@@ -22,43 +22,6 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 file(GLOB_RECURSE HEADERS include/${PROJECT_NAME}/*.h)
 file(GLOB_RECURSE SOURCES src/*.cpp)
 
-#################
-## Documenting ##
-#################
-option(BUILD_DOCS "Use Doxygen to create the HTML based API documentation" OFF)
-if(BUILD_DOCS)
-    find_package(Doxygen)
-    if(DOXYGEN_FOUND)
-        configure_file(${PROJECT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_BINARY_DIR}/doc/doxygen/Doxyfile @ONLY)
-        add_custom_target(docs ALL
-                          COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/doc/doxygen/Doxyfile
-                          WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/doc/doxygen/
-                          COMMENT "Generating API documentation with Doxygen" VERBATIM
-        )
-    endif(DOXYGEN_FOUND)
-endif(BUILD_DOCS)
-
-option(BUILD_SPHINX "Use sphinx to create the HTML based API documentation" OFF)
-if(BUILD_SPHINX)
-    find_package(Sphinx)
-    # configured documentation tools and intermediate build results
-    set(BINARY_BUILD_DIR "${PROJECT_SOURCE_DIR}/doc")
-    # Sphinx cache with pickled ReST documents
-    set(SPHINX_CACHE_DIR "${PROJECT_BINARY_DIR}/doc/sphinx/_doctrees")
-    # HTML output directory
-    set(SPHINX_HTML_DIR "${PROJECT_BINARY_DIR}/doc/sphinx/html")
-    # Copy the configured files for READTHEDOCS
-    configure_file("${PROJECT_SOURCE_DIR}/doc/conf.py.in" "${PROJECT_SOURCE_DIR}/doc/conf.py" @ONLY)
-    configure_file("${PROJECT_SOURCE_DIR}/doc/index.rst.in" "${PROJECT_SOURCE_DIR}/doc/index.rst" @ONLY)
-    add_custom_target(sphinx ALL
-                      COMMAND ${SPHINX_EXECUTABLE}
-                      -q -b html
-                      -c "${BINARY_BUILD_DIR}"
-                      -d "${SPHINX_CACHE_DIR}"
-                      "${BINARY_BUILD_DIR}"
-                      "${SPHINX_HTML_DIR}"
-                      COMMENT "Building HTML documentation with Sphinx")
-endif(BUILD_SPHINX)
 ##############
 ## Building ##
 ##############
@@ -67,30 +30,18 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 #############
 ## Testing ##
 #############
-option(BUILD_TESTS "Use Gtest to create the test cases for the code" OFF)
-if(BUILD_TESTS OR ENABLE_COVERAGE)
-    enable_testing()
-    file(GLOB_RECURSE TESTS ${PROJECT_SOURCE_DIR}/test/*.cpp)
-    foreach(ITEM ${TESTS})
-        get_filename_component(filename ${ITEM} NAME_WE)
-        catkin_add_gtest(${filename} ${ITEM})
-        target_link_libraries(${filename} ${PROJECT_NAME})
-    endforeach()
-endif(BUILD_TESTS OR ENABLE_COVERAGE)
-##############
-## Coverage ##
-##############
-option(ENABLE_COVERAGE "Enable code coverage generation" OFF)
-if(${ENABLE_COVERAGE} AND "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-    set(CMAKE_BUILD_TYPE "Debug")
-    add_definitions(-fprofile-arcs -ftest-coverage)
-    # link project library to support coverage
-    target_link_libraries(${PROJECT_NAME} -fprofile-arcs -ftest-coverage)
-    foreach(ITEM ${TESTS})
-        get_filename_component(filename ${ITEM} NAME_WE)
-        target_link_libraries(${filename} -fprofile-arcs -ftest-coverage)
-    endforeach()
-endif()
+if(CATKIN_ENABLE_TESTING)
+    find_package(rostest REQUIRED)
+
+    catkin_add_gtest(test_config test/test_config.cpp)
+    target_link_libraries(test_config ${PROJECT_NAME})
+
+    catkin_add_gtest(test_packet test/test_packet.cpp)
+    target_link_libraries(test_packet ${PROJECT_NAME})
+
+    add_rostest_gtest(test_driver test/test_driver.test test/test_driver.cpp)
+    target_link_libraries(test_driver ${PROJECT_NAME})    
+endif(CATKIN_ENABLE_TESTING)
 ################
 ## Installing ##
 ################

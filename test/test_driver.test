@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+	<node name="mobilesim" pkg="ros_pioneer" type="mobilesim.sh"/>
+	<test test-name="test_driver" pkg="ros_pioneer" type="test_driver"/>
+</launch>

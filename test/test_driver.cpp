@@ -45,6 +45,7 @@ using namespace std;
 TEST(PioneerDriver, Constructor)
 {
   ros::Time::init();
+  ros::Duration(2).sleep();
   PioneerDriver driver;
 }
 
