@@ -1,0 +1,20 @@
+actions: []
+authors: Aris Synodinos <arissynod@gmail.com>
+brief: ''
+bugtracker: ''
+depends:
+- nav_msgs
+- catkin
+- roscpp
+- roslib
+- python-catkin-pkg
+- geometry_msgs
+- tf
+description: The ros_pioneer package
+license: BSD
+maintainers: Aris Synodinos <arissynod@gmail.com>
+msgs: []
+package_type: package
+repo_url: ''
+srvs: []
+url: http://wiki.ros.org/ros_pioneer
